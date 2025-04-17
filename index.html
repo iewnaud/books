@@ -26,6 +26,7 @@
     const radius = circleLength / (2 * Math.PI); // 根据总圆周长自动算出合适半径
 
     // 生成图片并添加到 group
+    const photoGroup = new THREE.Group();
     for (let i = 0; i < numPhotos; i++) {
       const texture = new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`);
       const material = new THREE.MeshBasicMaterial({
