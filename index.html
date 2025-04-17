@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <title>Books</title>
+  <title>Books Carousel</title>
   <style>
     body { margin: 0; overflow: hidden; }
     canvas { display: block; }
@@ -14,83 +14,69 @@
   <script>
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#f5f5f5');
-
     const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const numPhotos = 12; // 修改这个数字以显示不同数量的图片
-    const photoWidth = 280;
-    const spacing = 20;
-    const radius = (numPhotos * (photoWidth + spacing)) / (2 * Math.PI);
+    fetch('booklist.json')
+      .then(response => response.json())
+      .then(books => {
+        const numPhotos = books.length;
+        const photoWidth = 280;
+        const spacing = 20;
+        const radius = (numPhotos * (photoWidth + spacing)) / (2 * Math.PI);
+        const photoGroup = new THREE.Group();
+        const emojiBase = '🟠';
 
-    const photoGroup = new THREE.Group();
+        books.forEach((book, i) => {
+          const texture = new THREE.TextureLoader().load(`assets/photos/${book.pinyin}.jpg`);
+          const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            side: THREE.FrontSide,
+            transparent: true
+          });
+          const geometry = new THREE.PlaneGeometry(photoWidth, 400);
+          const photo = new THREE.Mesh(geometry, material);
 
-    function createLabelCanvas(text) {
-      const size = 64;
-      const canvas = document.createElement('canvas');
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d');
+          const angle = (i / numPhotos) * Math.PI * 2;
+          photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+          photo.lookAt(new THREE.Vector3(0, 0, 0));
+          photoGroup.add(photo);
 
-      // Draw orange circle
-      ctx.fillStyle = '#ff6f61';
-      ctx.beginPath();
-      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
-      ctx.fill();
+          // 编号文本
+          const canvas = document.createElement('canvas');
+          canvas.width = 128;
+          canvas.height = 64;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#000';
+          ctx.font = 'bold 28px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${emojiBase} ${i + 1}`, 64, 42);
 
-      // Draw white number
-      ctx.fillStyle = 'white';
-      ctx.font = 'bold 30px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(text, size / 2, size / 2);
+          const labelTexture = new THREE.CanvasTexture(canvas);
+          const labelMaterial = new THREE.SpriteMaterial({ map: labelTexture, transparent: true });
+          const label = new THREE.Sprite(labelMaterial);
+          label.scale.set(120, 60, 1);
+          label.position.set(
+            Math.cos(angle) * radius,
+            230,
+            Math.sin(angle) * radius
+          );
+          photoGroup.add(label);
+        });
 
-      return canvas;
-    }
+        scene.add(photoGroup);
+        camera.position.set(0, 0, 1300);
 
-    for (let i = 0; i < numPhotos; i++) {
-      // 主图
-      const texture = new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`);
-      const material = new THREE.MeshBasicMaterial({
-        map: texture,
-        side: THREE.FrontSide,
-        transparent: true,
-        opacity: 1
+        function animate() {
+          requestAnimationFrame(animate);
+          photoGroup.rotation.y += 0.004;
+          renderer.render(scene, camera);
+        }
+
+        animate();
       });
-      const geometry = new THREE.PlaneGeometry(280, 400);
-      const photo = new THREE.Mesh(geometry, material);
-
-      const angle = (i / numPhotos) * Math.PI * 2;
-      photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-      const direction = photo.position.clone().multiplyScalar(2);
-      photo.lookAt(direction);
-      photo.castShadow = false;
-      photo.receiveShadow = false;
-      photoGroup.add(photo);
-
-      // 编号标签
-      const labelCanvas = createLabelCanvas(i + 1);
-      const labelTexture = new THREE.CanvasTexture(labelCanvas);
-      const labelMaterial = new THREE.SpriteMaterial({ map: labelTexture, transparent: true });
-      const sprite = new THREE.Sprite(labelMaterial);
-      sprite.scale.set(40, 40, 1);
-      sprite.position.set(0, 220, 2); // 在图片顶部稍微前面一点
-      photo.add(sprite);
-    }
-
-    scene.add(photoGroup);
-
-    camera.position.set(0, 0, 1300);
-
-    function animate() {
-      requestAnimationFrame(animate);
-      photoGroup.rotation.y += 0.008;
-      renderer.render(scene, camera);
-    }
-
-    animate();
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
