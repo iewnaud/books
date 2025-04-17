@@ -1,92 +1,55 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D照片轮播</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link rel="stylesheet" href="assets/styles.css">
+  <meta charset="UTF-8">
+  <title>3D Photo Wheel</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    .photo {
+      width: 300px;
+      height: 700px;
+      background-size: cover;
+      border: 2px solid white;
+      border-radius: 10px;
+    }
+  </style>
 </head>
 <body>
-    <div id="loading">加载中...</div>
-    <script>
-        // 初始化场景
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/renderers/CSS3DRenderer.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.z = 1000;
 
-        // 照片参数（7:10比例）
-        const targetAspect = 7 / 10;
-        const photoHeight = 4;
-        const photoWidth = photoHeight * targetAspect;
-        const gap = 0.8; // 照片间距
+    const renderer = new THREE.CSS3DRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-        // 加载照片并统一尺寸
-        const loadPhotos = async () => {
-            const photos = [];
-            for (let i = 0; i < 10; i++) {
-                const texture = await new THREE.TextureLoader().loadAsync(`assets/photos/photo_${i}.jpg`);
-                const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
-                const geometry = new THREE.PlaneGeometry(photoWidth, photoHeight);
-                const photo = new THREE.Mesh(geometry, material);
-                
-                // 水平排列照片
-                photo.position.x = i * (photoWidth + gap) - (10 * (photoWidth + gap)) / 2 + photoWidth/2;
-                scene.add(photo);
-                photos.push(photo);
-            }
-            return photos;
-        };
+    const radius = 800;
+    const numPhotos = 10;
 
-        // 初始化
-        let photos = [];
-        loadPhotos().then((loadedPhotos) => {
-            photos = loadedPhotos;
-            document.getElementById('loading').style.display = 'none';
-        });
+    for (let i = 0; i < numPhotos; i++) {
+      const element = document.createElement('div');
+      element.className = 'photo';
+      element.style.backgroundImage = `url('assets/photos/photo_${i}.jpg')`;
 
-        // 相机位置
-        camera.position.z = 15;
+      const object = new THREE.CSS3DObject(element);
 
-        // 交互控制
-        let isDragging = false, lastX = 0, targetX = 0, currentX = 0;
-        
-        // 桌面端鼠标事件
-        document.addEventListener('mousedown', (e) => { isDragging = true; lastX = e.clientX; });
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            targetX += (e.clientX - lastX) * 0.01;
-            lastX = e.clientX;
-        });
-        document.addEventListener('mouseup', () => isDragging = false);
+      const angle = i * (2 * Math.PI / numPhotos);
+      object.position.x = radius * Math.sin(angle);
+      object.position.z = radius * Math.cos(angle);
+      object.lookAt(scene.position);
 
-        // 移动端触摸事件
-        document.addEventListener('touchstart', (e) => { isDragging = true; lastX = e.touches[0].clientX; });
-        document.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            targetX += (e.touches[0].clientX - lastX) * 0.01;
-            lastX = e.touches[0].clientX;
-            e.preventDefault(); // 阻止页面滚动
-        });
-        document.addEventListener('touchend', () => isDragging = false);
+      scene.add(object);
+    }
 
-        // 动画循环
-        function animate() {
-            requestAnimationFrame(animate);
-            currentX += (targetX - currentX) * 0.1;
-            photos.forEach(p => p.position.x += (targetX - currentX) * 0.1);
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // 响应式布局
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
+    function animate() {
+      requestAnimationFrame(animate);
+      scene.rotation.y += 0.005;
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
 </body>
 </html>
