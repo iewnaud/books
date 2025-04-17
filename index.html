@@ -19,6 +19,7 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
+    // 设置相机位置（确保在圆柱外部）
     fetch('booklist.json')
       .then(response => response.json())
       .then(books => {
@@ -28,6 +29,10 @@
         const radius = (numPhotos * (photoWidth + spacing)) / (2 * Math.PI);
         const photoGroup = new THREE.Group();
         const emojiBase = '🟠';
+
+        // 确保相机位置和目标在加载物体前设置
+        camera.position.set(0, 0, radius * 1.5);  // 可以将此值调大，例如改成3，确保相机在物体外面
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         books.forEach((book, i) => {
           const texture = new THREE.TextureLoader().load(`assets/photos/${book.pinyin}.jpg`);
@@ -68,9 +73,6 @@
 
         scene.add(photoGroup);
         
-        // 设置相机位置（确保在圆柱外部）
-        camera.position.set(0, 0, radius * 3);  // 可以将此值调大，例如改成3，确保相机在物体外面
-        
         // 调整相机视野角度
         camera.fov = 80;  // 增加视野角度，尝试 80 或更大的值，看效果
         camera.updateProjectionMatrix();
@@ -81,9 +83,6 @@
         
         // 更新投影矩阵
         camera.updateProjectionMatrix();
-        
-        // 调整相机的目标位置，确保相机面朝中心
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
         
         function animate() {
           requestAnimationFrame(animate);
