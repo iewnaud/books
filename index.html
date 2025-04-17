@@ -25,15 +25,21 @@
 
     for (let i = 0; i < numPhotos; i++) {
       const texture = new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`);
-      const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
+      const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.FrontSide,
+        transparent: true,
+        opacity: 1
+      });
       const geometry = new THREE.PlaneGeometry(420, 600);
       const photo = new THREE.Mesh(geometry, material);
-
+      
       const angle = (i / numPhotos) * Math.PI * 2;
       photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
       const direction = photo.position.clone().multiplyScalar(2);
       photo.lookAt(direction);
-
+      photo.castShadow = false;  // 不产生阴影
+      photo.receiveShadow = false; // 不接受阴影
       photoGroup.add(photo);
     }
 
