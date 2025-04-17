@@ -15,7 +15,7 @@
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#f5f5f5'); // 浅灰背景
 
-    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 5000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
@@ -23,10 +23,10 @@
     const numPhotos = 12; // 修改这里为你的图片数量
     const photoWidth = 280;
     const photoHeight = 400;
-    const spacing = 20; // 调整图片间隔（越小越紧凑）
+    const spacing = 20; // 图片之间的间距
 
     const circleLength = numPhotos * (photoWidth + spacing);
-    const radius = circleLength / (2 * Math.PI); // 自动适配半径
+    const radius = circleLength / (2 * Math.PI);
     const photoGroup = new THREE.Group();
 
     for (let i = 0; i < numPhotos; i++) {
@@ -41,13 +41,18 @@
       const photo = new THREE.Mesh(geometry, material);
 
       const angle = (i / numPhotos) * Math.PI * 2;
-      photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-      photo.lookAt(new THREE.Vector3(0, 0, 0)); // 朝向圆心
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      photo.position.set(x, 0, z);
+      photo.lookAt(0, 0, 0); // 朝向圆心
       photoGroup.add(photo);
     }
 
     scene.add(photoGroup);
-    camera.position.set(0, 0, radius + 800); // 自动拉远相机适配大小
+
+    // ✅ 相机位置设置在圆外更远处，并朝向圆心
+    camera.position.set(0, 0, radius + 1000);
+    camera.lookAt(0, 0, 0);
 
     function animate() {
       requestAnimationFrame(animate);
