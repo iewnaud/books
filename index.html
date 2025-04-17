@@ -14,12 +14,12 @@
   <script>
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#f5f5f5'); // 浅灰色
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const radius = 800;
+    const radius = 1200;
     const numPhotos = 10;
     const photoGroup = new THREE.Group();
 
@@ -38,7 +38,7 @@
     }
 
     scene.add(photoGroup);
-    camera.position.set(0, 0, 1600); // 更远一点
+    camera.position.set(0, 0, 1300); // 更远一点
     function animate() {
       requestAnimationFrame(animate);
       photoGroup.rotation.y += 0.006; // 自动旋转
