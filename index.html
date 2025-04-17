@@ -37,7 +37,7 @@
       const geometry = new THREE.PlaneGeometry(280, 400);
       const photo = new THREE.Mesh(geometry, material);
       
-      const angle = (i / numPhotos) * Math.PI * 2 + Math.PI / numPhotos;
+      const angle = (i / numPhotos) * Math.PI * 2;
       photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
       const direction = photo.position.clone().multiplyScalar(2);
       photo.lookAt(direction);
