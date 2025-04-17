@@ -38,7 +38,7 @@
           const texture = new THREE.TextureLoader().load(`assets/photos/${book.pinyin}.jpg`);
           const material = new THREE.MeshBasicMaterial({
             map: texture,
-            side: THREE.FrontSide,
+            side: THREE.DoubleSide,
             transparent: true
           });
           const geometry = new THREE.PlaneGeometry(photoWidth, 400);
