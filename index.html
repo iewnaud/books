@@ -13,7 +13,20 @@
 
   <script>
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#f5f5f5');
+    // scene.background = new THREE.Color('#f5f5f5');
+    // 环境光（提供基础亮度）
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // 白光，强度0.6
+    scene.add(ambientLight);
+    
+    // 方向光（类似太阳光，给点阴影感）
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(100, 200, 100); // 光源从上方偏右照下来
+    scene.add(directionalLight);
+    
+    // 如果想要更艺术，可以加一个轻微蓝调的环境光
+    scene.add(new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.5));
+    scene.background = new THREE.Color(0xddeeff);  // 柔和蓝天背景
+    
     const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
