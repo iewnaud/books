@@ -16,27 +16,32 @@ body {
   top: 80px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;  /* 使整体宽度适应 */
-  max-width: 900px;  /* 限制最大宽度 */
+  max-width: 1000px;
+  padding: 0 40px;
+  font-family: 'Caveat', cursive;
   font-size: 24px;
+  line-height: 1.6;
   color: #333;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  text-align: left;
   animation: fadeIn 2s ease-out;
-  pointer-events: none;
 }
 
 .main-text {
-  text-align: center;  /* 第一行居中 */
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 300px;
 }
 
 .quote-attribution {
-  text-align: right;  /* 引用部分右对齐 */
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-left: 20px;
   font-weight: bold;
-  font-size: 20px;
-  margin-top: 10px; /* 添加上边距 */
-  opacity: 0.8;
-  width: 100%;
-  white-space: nowrap;  /* 防止引用部分换行 */
+  font-size: 22px;
+  align-self: flex-end;
+  opacity: 0.85;
 }
 
 @keyframes fadeIn {
