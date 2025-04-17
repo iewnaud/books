@@ -21,10 +21,9 @@
     
     const numPhotos = 12; // 实际图片数量
     const photoWidth = 280;
-    const spacing = 20; // 每张图之间的间隔（你可以调成 10 或 15 来更紧凑）
-    const circleLength = numPhotos * (photoWidth + spacing);
-    const radius = circleLength / (2 * Math.PI); // 根据总圆周长自动算出合适半径
-
+    const spacing = 20;
+    const radius = (numPhotos * (photoWidth + spacing)) / (2 * Math.PI);
+   
     // 生成图片并添加到 group
     const photoGroup = new THREE.Group();
     for (let i = 0; i < numPhotos; i++) {
@@ -38,7 +37,7 @@
       const geometry = new THREE.PlaneGeometry(280, 400);
       const photo = new THREE.Mesh(geometry, material);
       
-      const angle = (i / numPhotos) * Math.PI * 2;
+      const angle = (i / numPhotos) * Math.PI * 2 + Math.PI / numPhotos;
       photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
       const direction = photo.position.clone().multiplyScalar(2);
       photo.lookAt(direction);
@@ -50,7 +49,7 @@
     scene.add(photoGroup);
 
     // 调整相机位置，以适应更多的图片
-    camera.position.set(0, 0, 1600); // 更远一点，以便显示更多图片
+    camera.position.set(0, 0, 1300); // 更远一点，以便显示更多图片
 
     function animate() {
       requestAnimationFrame(animate);
