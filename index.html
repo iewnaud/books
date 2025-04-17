@@ -9,40 +9,22 @@
   </style>
 </head>
 <body>
-  <!-- 加载 Three.js -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <!-- 加载 OrbitControls -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 
   <script>
-    let controls;
-
-    // 创建场景、相机和渲染器
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // 初始化 OrbitControls
-    function initControls() {
-      controls = new THREE.OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true; // 启用阻尼效果
-      controls.dampingFactor = 0.25;
-      controls.enableZoom = true; // 启用缩放
-    }
-
-    // 加载图片并设置位置
     const radius = 800;
     const numPhotos = 10;
+    const photoGroup = new THREE.Group();
 
     for (let i = 0; i < numPhotos; i++) {
       const texture = new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`);
-      const material = new THREE.MeshBasicMaterial({
-        map: texture,
-        side: THREE.FrontSide
-      });
-
+      const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
       const geometry = new THREE.PlaneGeometry(200, 200);
       const photo = new THREE.Mesh(geometry, material);
 
@@ -50,25 +32,20 @@
       photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
       photo.lookAt(0, 0, 0);
 
-      scene.add(photo);
+      photoGroup.add(photo);
     }
 
+    scene.add(photoGroup);
     camera.position.z = 1000;
 
-    // 动画循环
     function animate() {
       requestAnimationFrame(animate);
-      controls.update(); // 更新控制器
-      renderer.render(scene, camera); // 渲染场景
+      photoGroup.rotation.y += 0.003; // 自动旋转
+      renderer.render(scene, camera);
     }
 
-    // 启动动画
-    window.onload = function () {
-      initControls(); // 初始化控制器
-      animate(); // 启动动画循环
-    };
+    animate();
 
-    // 窗口大小变化时更新渲染器和相机
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
