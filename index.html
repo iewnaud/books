@@ -26,7 +26,7 @@
     for (let i = 0; i < numPhotos; i++) {
       const texture = new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`);
       const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
-      const geometry = new THREE.PlaneGeometry(1440, 2000);
+      const geometry = new THREE.PlaneGeometry(420, 600);
       const photo = new THREE.Mesh(geometry, material);
 
       const angle = (i / numPhotos) * Math.PI * 2;
