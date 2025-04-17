@@ -5,47 +5,48 @@
   <title>Books</title>
   <link href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" rel="stylesheet">
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      font-family: Georgia, 'Times New Roman', serif;
-    }
-
-    canvas {
-      display: block;
-    }
+body {
+  margin: 0;
+  font-family: 'Caveat', cursive;
+}
 
 #quote {
   position: absolute;
   top: 80px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
-  max-width: 900px;
   font-size: 24px;
-  line-height: 1.8;
   color: #333;
-  font-family: 'Caveat', cursive;
-  letter-spacing: 0.5px;
   animation: fadeIn 2s ease-out;
   pointer-events: none;
-  text-align: center;
+  width: 90%;
+  max-width: 900px;
+}
+
+.main-text {
+  text-align: center; /* 第一行居中 */
+  display: inline-block;
+  width: 100%;
 }
 
 .quote-attribution {
-  margin-left: 10px;
-  font-size: 18px;
-  opacity: 0.9;
+  text-align: right; /* 引用部分右对齐 */
+  font-weight: bold;
+  font-size: 20px;
+  margin-left: 20px;
+  opacity: 0.8;
+  display: inline-block;
+  width: 100%;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -10px);
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translateY(0);
   }
 }
 
@@ -54,8 +55,12 @@
 <body>
 
   <div id="quote">
-    If we must build a bridge, let us throw one arch at least over the darker gulf of ignorance which surrounds us. 
-    <span class="quote-attribution">— Henry David Thoreau <em>Walden</em></span>
+    <div class="main-text">
+      If we must build a bridge, let us throw one arch at least over the darker gulf of ignorance which surrounds us.
+    </div>
+    <div class="quote-attribution">
+      — Henry David Thoreau, <em>Walden</em>
+    </div>
   </div>
   
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
