@@ -20,14 +20,22 @@
   top: 80px;
   left: 50%;
   transform: translateX(-50%);
+  width: 90%;
+  max-width: 900px;
   font-size: 24px;
+  line-height: 1.8;
   color: #333;
   font-family: 'Caveat', cursive;
   letter-spacing: 0.5px;
-  line-height: 1.6;       /* ✅ 加大行距 */
-  text-align: center;     /* ✅ 多行文字居中 */
   animation: fadeIn 2s ease-out;
   pointer-events: none;
+  text-align: center;
+}
+
+.quote-attribution {
+  margin-left: 10px;
+  font-size: 18px;
+  opacity: 0.9;
 }
 
 @keyframes fadeIn {
@@ -46,8 +54,8 @@
 <body>
 
   <div id="quote">
-    If we must build a bridge, let us throw one arch at least over the darker gulf of ignorance which surrounds us.<br>
-    &mdash; Henry David Thoreau, <em>Walden</em>
+    If we must build a bridge, let us throw one arch at least over the darker gulf of ignorance which surrounds us. 
+    <span class="quote-attribution">— Henry David Thoreau <em>Walden</em></span>
   </div>
   
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
