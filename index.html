@@ -13,22 +13,19 @@
 
   <script>
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#f5f5f5'); // 浅灰背景
-
-    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 5000);
+    scene.background = new THREE.Color('#f5f5f5'); // 浅灰色
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
-
-    const numPhotos = 12; // 修改这里为你的图片数量
+    
+    const numPhotos = 12; // 实际图片数量
     const photoWidth = 280;
-    const photoHeight = 400;
-    const spacing = 20; // 图片之间的间距
-
+    const spacing = 20; // 每张图之间的间隔（你可以调成 10 或 15 来更紧凑）
     const circleLength = numPhotos * (photoWidth + spacing);
-    const radius = circleLength / (2 * Math.PI);
-    const photoGroup = new THREE.Group();
+    const radius = circleLength / (2 * Math.PI); // 根据总圆周长自动算出合适半径
 
+    // 生成图片并添加到 group
     for (let i = 0; i < numPhotos; i++) {
       const texture = new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`);
       const material = new THREE.MeshBasicMaterial({
@@ -37,26 +34,26 @@
         transparent: true,
         opacity: 1
       });
-      const geometry = new THREE.PlaneGeometry(photoWidth, photoHeight);
+      const geometry = new THREE.PlaneGeometry(280, 400);
       const photo = new THREE.Mesh(geometry, material);
-
+      
       const angle = (i / numPhotos) * Math.PI * 2;
-      const x = Math.cos(angle) * radius;
-      const z = Math.sin(angle) * radius;
-      photo.position.set(x, 0, z);
-      photo.lookAt(0, 0, 0); // 朝向圆心
+      photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+      const direction = photo.position.clone().multiplyScalar(2);
+      photo.lookAt(direction);
+      photo.castShadow = false;  // 不产生阴影
+      photo.receiveShadow = false; // 不接受阴影
       photoGroup.add(photo);
     }
 
     scene.add(photoGroup);
 
-    // ✅ 相机位置设置在圆外更远处，并朝向圆心
-    camera.position.set(0, 0, radius + 1600);
-    camera.lookAt(0, 0, 0);
+    // 调整相机位置，以适应更多的图片
+    camera.position.set(0, 0, 1600); // 更远一点，以便显示更多图片
 
     function animate() {
       requestAnimationFrame(animate);
-      photoGroup.rotation.y += 0.004; // 控制旋转速度
+      photoGroup.rotation.y += 0.004; // 自动旋转
       renderer.render(scene, camera);
     }
 
