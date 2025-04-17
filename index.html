@@ -14,15 +14,18 @@
   <script>
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#f5f5f5'); // 浅灰色
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 3000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const radius = 1000;
-    const numPhotos = 10;
+    const maxPhotos = 100; // 最大图片数量
+    let numPhotos = 10; // 初始图片数量
+    const spacing = Math.max(5, 1000 / numPhotos); // 根据数量调节间距
+    const radius = 1000 - spacing; // 调整半径，确保适配间距
     const photoGroup = new THREE.Group();
 
+    // 生成图片并添加到 group
     for (let i = 0; i < numPhotos; i++) {
       const texture = new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`);
       const material = new THREE.MeshBasicMaterial({
@@ -44,7 +47,8 @@
     }
 
     scene.add(photoGroup);
-    camera.position.set(0, 0, 1500); // 更远一点
+    camera.position.set(0, 0, 1500); // 相机位置，可以根据图片数量做调整
+
     function animate() {
       requestAnimationFrame(animate);
       photoGroup.rotation.y += 0.006; // 自动旋转
