@@ -67,8 +67,20 @@
         });
 
         scene.add(photoGroup);
-        camera.position.set(0, 0, radius * 1.5);
-
+        
+        camera.position.set(0, 0, radius * 2.5); // 相机位置在圆柱外部
+        
+        // 调整视角的 FOV，确保相机的视野不被限制
+        camera.fov = 75;  // 视角设置为75度，增加或减小视野角度尝试不同的效果
+        camera.updateProjectionMatrix();
+        
+        // 调整相机的近远平面，避免超出范围
+        camera.near = 0.1;
+        camera.far = radius * 5; // 确保远方足够远
+        
+        // 更新相机投影矩阵
+        camera.updateProjectionMatrix();
+        
         function animate() {
           requestAnimationFrame(animate);
           photoGroup.rotation.y += 0.004;
