@@ -45,8 +45,10 @@
           const photo = new THREE.Mesh(geometry, material);
 
           const angle = (i / numPhotos) * Math.PI * 2;
+
           photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
           photo.lookAt(new THREE.Vector3(0, 0, 0));
+          photo.rotateY(Math.PI); // ✅ 翻转图片，正面朝外
           photoGroup.add(photo);
 
           // 编号文本
