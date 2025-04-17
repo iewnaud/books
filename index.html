@@ -3,12 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <title>Books</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; overflow: hidden; }
-    canvas { display: block; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    #quote {
+      position: absolute;
+      top: 30px;
+      width: 100%;
+      text-align: center;
+      font-size: 24px;
+      color: #333;
+      font-family: 'Dancing Script', cursive;
+      letter-spacing: 0.5px;
+      animation: fadeIn 2s ease-out;
+      pointer-events: none; /* 不影响鼠标操作 */
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
+  
+  <div id="quote">
+    If we must build a bridge, let us throw one arch at least over the darker gulf of ignorance which surrounds us.
+  </div>
+  
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 
   <script>
