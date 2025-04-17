@@ -13,20 +13,45 @@
 
   <script>
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#f5f5f5'); // 浅灰色
+    scene.background = new THREE.Color('#f5f5f5');
+
     const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
-    
-    const numPhotos = 12; // 实际图片数量
+
+    const numPhotos = 12; // 修改这个数字以显示不同数量的图片
     const photoWidth = 280;
     const spacing = 20;
     const radius = (numPhotos * (photoWidth + spacing)) / (2 * Math.PI);
-   
-    // 生成图片并添加到 group
+
     const photoGroup = new THREE.Group();
+
+    function createLabelCanvas(text) {
+      const size = 64;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      // Draw orange circle
+      ctx.fillStyle = '#ff6f61';
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw white number
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 30px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, size / 2, size / 2);
+
+      return canvas;
+    }
+
     for (let i = 0; i < numPhotos; i++) {
+      // 主图
       const texture = new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`);
       const material = new THREE.MeshBasicMaterial({
         map: texture,
@@ -36,24 +61,32 @@
       });
       const geometry = new THREE.PlaneGeometry(280, 400);
       const photo = new THREE.Mesh(geometry, material);
-      
+
       const angle = (i / numPhotos) * Math.PI * 2;
       photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
       const direction = photo.position.clone().multiplyScalar(2);
       photo.lookAt(direction);
-      photo.castShadow = false;  // 不产生阴影
-      photo.receiveShadow = false; // 不接受阴影
+      photo.castShadow = false;
+      photo.receiveShadow = false;
       photoGroup.add(photo);
+
+      // 编号标签
+      const labelCanvas = createLabelCanvas(i + 1);
+      const labelTexture = new THREE.CanvasTexture(labelCanvas);
+      const labelMaterial = new THREE.SpriteMaterial({ map: labelTexture, transparent: true });
+      const sprite = new THREE.Sprite(labelMaterial);
+      sprite.scale.set(40, 40, 1);
+      sprite.position.set(0, 220, 2); // 在图片顶部稍微前面一点
+      photo.add(sprite);
     }
 
     scene.add(photoGroup);
 
-    // 调整相机位置，以适应更多的图片
-    camera.position.set(0, 0, 1300); // 更远一点，以便显示更多图片
+    camera.position.set(0, 0, 1300);
 
     function animate() {
       requestAnimationFrame(animate);
-      photoGroup.rotation.y += 0.008; // 自动旋转
+      photoGroup.rotation.y += 0.008;
       renderer.render(scene, camera);
     }
 
