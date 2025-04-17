@@ -14,7 +14,7 @@
   <script>
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#f5f5f5'); // 浅灰色
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 3000);
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
@@ -51,7 +51,7 @@
 
     function animate() {
       requestAnimationFrame(animate);
-      photoGroup.rotation.y += 0.006; // 自动旋转
+      photoGroup.rotation.y += 0.004; // 自动旋转
       renderer.render(scene, camera);
     }
 
