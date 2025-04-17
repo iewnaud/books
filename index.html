@@ -1,60 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Books</title>
-    <style>
-      body { margin: 0; overflow: hidden; }
-      canvas { display: block; }
-    </style>
-  </head>
-  <body>
-    <script type="module">
-      import * as THREE from 'https://unpkg.com/three@0.152.2/build/three.module.js';
-      import { OrbitControls } from 'https://unpkg.com/three@0.152.2/examples/jsm/controls/OrbitControls.js';
+<head>
+  <meta charset="UTF-8" />
+  <title>Books</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <!-- 引入 Three.js 和 OrbitControls -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.body.appendChild(renderer.domElement);
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-      const controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.05;
-      controls.enableZoom = false;
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.enableZoom = false;
 
-      const radius = 800;
-      const numPhotos = 10;
+    const radius = 800;
+    const numPhotos = 10;
 
-      for (let i = 0; i < numPhotos; i++) {
-        const texture = new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`);
-        const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
-        const geometry = new THREE.PlaneGeometry(200, 200);
-        const photo = new THREE.Mesh(geometry, material);
-
-        const angle = (i / numPhotos) * Math.PI * 2;
-        photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-        photo.lookAt(0, 0, 0);
-
-        scene.add(photo);
-      }
-
-      camera.position.z = 1000;
-
-      function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
-      }
-
-      animate();
-
-      window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+    for (let i = 0; i < numPhotos; i++) {
+      const texture = new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`);
+      const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.FrontSide
       });
-    </script>
-  </body>
+
+      const geometry = new THREE.PlaneGeometry(200, 200);
+      const photo = new THREE.Mesh(geometry, material);
+
+      const angle = (i / numPhotos) * Math.PI * 2;
+      photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+      photo.lookAt(0, 0, 0);
+
+      scene.add(photo);
+    }
+
+    camera.position.z = 1000;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
 </html>
