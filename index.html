@@ -19,7 +19,7 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const radius = 800;
+    const radius = 1000;
     const numPhotos = 10;
     const photoGroup = new THREE.Group();
 
@@ -31,7 +31,7 @@
         transparent: true,
         opacity: 1
       });
-      const geometry = new THREE.PlaneGeometry(420, 600);
+      const geometry = new THREE.PlaneGeometry(280, 400);
       const photo = new THREE.Mesh(geometry, material);
       
       const angle = (i / numPhotos) * Math.PI * 2;
@@ -44,7 +44,7 @@
     }
 
     scene.add(photoGroup);
-    camera.position.set(0, 0, 1300); // 更远一点
+    camera.position.set(0, 0, 1500); // 更远一点
     function animate() {
       requestAnimationFrame(animate);
       photoGroup.rotation.y += 0.006; // 自动旋转
