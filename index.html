@@ -25,7 +25,7 @@
     for (let i = 0; i < numPhotos; i++) {
       const texture = new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`);
       const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.FrontSide });
-      const geometry = new THREE.PlaneGeometry(200, 200);
+      const geometry = new THREE.PlaneGeometry(280, 400);
       const photo = new THREE.Mesh(geometry, material);
 
       const angle = (i / numPhotos) * Math.PI * 2;
@@ -40,7 +40,7 @@
 
     function animate() {
       requestAnimationFrame(animate);
-      photoGroup.rotation.y += 0.003; // 自动旋转
+      photoGroup.rotation.y += 0.012; // 自动旋转
       renderer.render(scene, camera);
     }
 
