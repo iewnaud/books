@@ -9,22 +9,33 @@
   </style>
 </head>
 <body>
-  <!-- 使用不同的 CDN，保证可以正确加载 Three.js 和 OrbitControls -->
+  <!-- 引入 Three.js 和 OrbitControls -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/controls/OrbitControls.js"></script>
 
   <script>
+    // 等待 OrbitControls 被正确加载
+    let controls;
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // 创建 OrbitControls 实例
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.enableZoom = false;
+    // 初始化 OrbitControls 时要在 `THREE` 已经加载的环境下
+    function initControls() {
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.enableZoom = false;
+    }
+
+    // 在 DOM 加载后初始化控制器
+    window.onload = function () {
+      initControls(); // 确保在加载后初始化 OrbitControls
+      animate(); // 动画开始
+    };
 
     const radius = 800;
     const numPhotos = 10;
@@ -50,11 +61,11 @@
 
     function animate() {
       requestAnimationFrame(animate);
-      controls.update(); // 使控制器生效
+      if (controls) {
+        controls.update(); // 更新控制器
+      }
       renderer.render(scene, camera);
     }
-
-    animate();
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
