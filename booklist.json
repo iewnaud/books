@@ -1,4 +1,5 @@
-[ { "title": "安娜卡列尼娜", "pinyin": "annanakalienina" },
+[
+  { "title": "安娜卡列尼娜", "pinyin": "annanakalienina" },
   { "title": "傲慢与偏见", "pinyin": "aomanyupianjian" },
   { "title": "白鹿原", "pinyin": "bailuyuan" },
   { "title": "百年孤独", "pinyin": "bainiangudu" },
@@ -12,10 +13,10 @@
   { "title": "德米安", "pinyin": "demian" },
   { "title": "第七天", "pinyin": "diqitian" },
   { "title": "动物农场", "pinyin": "dongwunongchang" },
-  { "title": "风声", "pinyin": "fengsheng" }
+  { "title": "风声", "pinyin": "fengsheng" },
   { "title": "复活", "pinyin": "fuhuo" },
   { "title": "钢铁是怎样练成的", "pinyin": "gangtieshizenyanglianchengde" },
   { "title": "红楼梦", "pinyin": "hongloumeng" },
   { "title": "霍乱时期的爱情", "pinyin": "huoluanshiqideaiqing" },
-  { "title": "活着", "pinyin": "huozhe" },
+  { "title": "活着", "pinyin": "huozhe" }
 ]
