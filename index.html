@@ -15,15 +15,17 @@
       display: block;
     }
 
-   #quote {
+#quote {
   position: absolute;
   top: 80px;
   left: 50%;
-  transform: translate(-50%, 0);
+  transform: translateX(-50%);
   font-size: 24px;
   color: #333;
   font-family: 'Dancing Script', cursive;
   letter-spacing: 0.5px;
+  line-height: 1.6;       /* ✅ 加大行距 */
+  text-align: center;     /* ✅ 多行文字居中 */
   animation: fadeIn 2s ease-out;
   pointer-events: none;
 }
