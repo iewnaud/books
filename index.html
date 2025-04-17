@@ -19,11 +19,11 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // 添加 OrbitControls 控制器
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    // ✅ 正确使用 OrbitControls（不要加 THREE.）
+    const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.enableZoom = false; // 如果你想要缩放可以设为 true
+    controls.enableZoom = false;
 
     const radius = 800;
     const numPhotos = 10;
@@ -32,7 +32,7 @@
       const texture = new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`);
       const material = new THREE.MeshBasicMaterial({
         map: texture,
-        side: THREE.FrontSide // 只显示正面，避免镜像问题
+        side: THREE.FrontSide
       });
 
       const geometry = new THREE.PlaneGeometry(200, 200);
@@ -49,13 +49,12 @@
 
     function animate() {
       requestAnimationFrame(animate);
-      controls.update(); // 更新相机控制状态
+      controls.update();
       renderer.render(scene, camera);
     }
 
     animate();
 
-    // 响应式支持
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
