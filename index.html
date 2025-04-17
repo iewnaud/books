@@ -9,11 +9,11 @@
   </style>
 </head>
 <body>
-  <!-- 使用 skypack.dev 加载 Three.js 和 OrbitControls -->
-  <script src="https://cdn.skypack.dev/three@0.152.2/build/three.min.js"></script>
-  <script type="module">
-    import { OrbitControls } from "https://cdn.skypack.dev/three@0.152.2/examples/jsm/controls/OrbitControls.js";
+  <!-- 使用 cdn.jsdelivr.net 加载 Three.js 和 OrbitControls -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 
+  <script>
     let controls;
 
     const scene = new THREE.Scene();
@@ -22,9 +22,9 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // 初始化 OrbitControls 时要在 THREE 已经加载的环境下
+    // 初始化 OrbitControls
     function initControls() {
-      controls = new OrbitControls(camera, renderer.domElement);
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
       controls.enableZoom = false;
