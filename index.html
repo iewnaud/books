@@ -37,7 +37,7 @@
       const geometry = new THREE.PlaneGeometry(200, 200);
       const material = new THREE.MeshBasicMaterial({
         map: new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`),
-        side: THREE.DoubleSide
+        side: THREE.FrontSide
       });
 
       // 创建一个 Mesh（3D 网格）
