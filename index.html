@@ -6,68 +6,61 @@
   <style>
     body { margin: 0; overflow: hidden; }
     canvas { display: block; }
-    .photo {
-      position: absolute;
-      width: 140px;
-      height: 200px;
-      background-size: cover;
-    }
   </style>
 </head>
 <body>
+  <!-- 引入 Three.js 和 OrbitControls -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
   <script>
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
+    // 添加 OrbitControls 控制器
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.enableZoom = false; // 如果你想要缩放可以设为 true
+
     const radius = 800;
     const numPhotos = 10;
 
-    // 加载纹理并创建 3D 对象
     for (let i = 0; i < numPhotos; i++) {
-      const element = document.createElement('div');
-      element.className = 'photo';
-      element.style.backgroundImage = `url('assets/photos/photo_${i}.jpg')`;
-      element.style.backgroundSize = 'cover'; // 保证背景图片适应容器大小
-
-      // 创建平面几何体
-      const geometry = new THREE.PlaneGeometry(200, 200);
+      const texture = new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`);
       const material = new THREE.MeshBasicMaterial({
-        map: new THREE.TextureLoader().load(`assets/photos/photo_${i}.jpg`),
-        side: THREE.FrontSide
+        map: texture,
+        side: THREE.FrontSide // 只显示正面，避免镜像问题
       });
 
-      // 创建一个 Mesh（3D 网格）
+      const geometry = new THREE.PlaneGeometry(200, 200);
       const photo = new THREE.Mesh(geometry, material);
 
-      // 根据角度调整照片位置
       const angle = (i / numPhotos) * Math.PI * 2;
       photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-
-      // 确保照片始终朝向中心
       photo.lookAt(0, 0, 0);
 
-      // 将照片加入到场景中
       scene.add(photo);
     }
 
-    // 设置摄像头的位置
     camera.position.z = 1000;
 
-    // 动画函数，不断渲染场景
     function animate() {
       requestAnimationFrame(animate);
-
-      // 旋转整个场景
-      scene.rotation.y += 0.005;
-
-      // 渲染场景和摄像头
+      controls.update(); // 更新相机控制状态
       renderer.render(scene, camera);
     }
+
     animate();
+
+    // 响应式支持
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
   </script>
 </body>
 </html>
