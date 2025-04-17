@@ -19,7 +19,7 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    fetch('./booklist.json')
+    fetch('booklist.json')
       .then(response => response.json())
       .then(books => {
         const numPhotos = books.length;
