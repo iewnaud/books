@@ -17,25 +17,30 @@
 
     #quote {
       position: absolute;
-      top: 30px;
-      width: 100%;
-      text-align: center;
+      top: 30px;  /* 控制距离页面顶部的距离 */
+      left: 50%;
+      transform: translateX(-50%);  /* 将文字水平居中 */
       font-size: 24px;
       color: #333;
       font-family: 'Dancing Script', cursive;
       letter-spacing: 0.5px;
       animation: fadeIn 2s ease-out;
-      pointer-events: none; /* 不影响鼠标操作 */
+      pointer-events: none;  /* 使文本层不影响鼠标操作 */
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
 <body>
-  
   <div id="quote">
     If we must build a bridge, let us throw one arch at least over the darker gulf of ignorance which surrounds us.
   </div>
