@@ -48,6 +48,11 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 
   <script>
+    window.onload = function () {
+                                const quote = document.getElementById('quote');
+                                quote.style.left = '50%';  // 再次设置居中
+                                quote.style.transform = 'translateX(-50%)';  // 确保保持居中
+                                }
     const scene = new THREE.Scene();
     // scene.background = new THREE.Color('#f5f5f5');
     // 环境光（提供基础亮度）
