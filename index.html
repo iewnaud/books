@@ -3,64 +3,63 @@
 <head>
   <meta charset="UTF-8" />
   <title>Books</title>
+  <!-- 1. 预加载字体 -->
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" as="style">
   <link href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" rel="stylesheet">
   <style>
-    
-body {
-  margin: 0;
-  font-family: 'Caveat', cursive;
-}
-
-#quote {
-  position: absolute;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 24px;
-  color: #333;
-  animation: fadeIn 2s ease-out forwards; /* 3. 调整动画，确保最终状态正确 */
-  pointer-events: none;
-  width: 90%;
-  max-width: 900px;
-  text-align: center; /* 初始就设置居中 */
-  opacity: 0; /* 初始透明，动画结束后才显示 */
-}
-
-.main-text {
-  text-align: center; /* 第一行居中 */
-  display: inline-block;
-  width: 100%;
-}
-
-.quote-attribution {
-  text-align: right; /* 引用部分右对齐 */
-  font-weight: bold;
-  font-size: 20px;
-  margin-left: 20px;
-  opacity: 0.8;
-  display: inline-block;
-  width: 100%;
-}
-
-  @keyframes fadeIn {
-    to {
-      opacity: 1;
+    body {
+      margin: 0;
+      font-family: 'Caveat', cursive;
     }
-  }
 
+    #quote {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      color: #333;
+      animation: fadeIn 2s ease-out forwards;
+      pointer-events: none;
+      width: 90%;
+      max-width: 900px;
+      opacity: 0; /* 初始透明 */
+      text-align: center; /* 仅影响直接子元素的默认对齐 */
+    }
+
+    /* 明确控制子元素对齐 */
+    .main-text {
+      text-align: center;
+      display: block; /* 改为 block 更符合语义 */
+      width: 100%;
+    }
+
+    .quote-attribution {
+      text-align: right;
+      font-weight: bold;
+      font-size: 20px;
+      margin-top: 10px; /* 增加间距 */
+      opacity: 0.8;
+      display: block;
+      width: 100%;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
   </style>
 </head>
 <body>
-
-<div id="quote">
-  <div class="main-text">
-    If we must build a bridge, let us throw one arch at least over the darker gulf of ignorance which surrounds us.
+  <div id="quote">
+    <div class="main-text">
+      If we must build a bridge, let us throw one arch at least over the darker gulf of ignorance which surrounds us.
+    </div>
+    <div class="quote-attribution">
+      &mdash; Henry David Thoreau, <em>Walden</em>
+    </div>
   </div>
-  <div class="quote-attribution">
-    &mdash; Henry David Thoreau, <em>Walden</em>
-  </div>
-</div>
   
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 
