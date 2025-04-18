@@ -10,6 +10,7 @@
     body {
       margin: 0;
       font-family: 'Caveat', cursive;
+      overflow: hidden; /* 防止页面滚动 */
     }
 
     #quote {
@@ -25,6 +26,7 @@
       max-width: 900px;
       opacity: 0; /* 初始透明 */
       text-align: center; /* 仅影响直接子元素的默认对齐 */
+      z-index: 10;
     }
 
     /* 明确控制子元素对齐 */
@@ -62,10 +64,10 @@
   </div>
   
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 
   <script>
     const scene = new THREE.Scene();
-    // scene.background = new THREE.Color('#f5f5f5');
     // 环境光（提供基础亮度）
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // 白光，强度0.6
     scene.add(ambientLight);
@@ -84,7 +86,14 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // 设置相机位置（确保在圆柱外部）
+    // 初始化控制器
+    let controls;
+    let photoGroup;
+    let autoRotate = true;
+    let autoRotateTimeout;
+    const ROTATION_SPEED = 0.004;
+    const RESUME_DELAY = 3000; // 3秒后恢复自动旋转
+
     fetch('booklist.json')
       .then(response => response.json())
       .then(books => {
@@ -92,11 +101,11 @@
         const photoWidth = 280;
         const spacing = 20;
         const radius = (numPhotos * (photoWidth + spacing)) / (2 * Math.PI);
-        const photoGroup = new THREE.Group();
+        photoGroup = new THREE.Group();
         const emojiBase = '🟠';
 
-        // 确保相机位置和目标在加载物体前设置
-        camera.position.set(0, 0, radius * 1.25);  // 可以将此值调大，例如改成3，确保相机在物体外面
+        // 设置相机位置
+        camera.position.set(0, 0, radius * 1.25);
         camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         books.forEach((book, i) => {
@@ -140,20 +149,38 @@
 
         scene.add(photoGroup);
         
-        // 调整相机视野角度
-        camera.fov = 80;  // 增加视野角度，尝试 80 或更大的值，看效果
+        // 调整相机参数
+        camera.fov = 80;
+        camera.near = 0.1;
+        camera.far = radius * 5;
         camera.updateProjectionMatrix();
         
-        // 调整近远平面
-        camera.near = 0.1;  // 不要太小
-        camera.far = radius * 5;  // 增大远平面，确保可以看到远处的物体
+        // 初始化轨道控制器
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableZoom = false; // 禁用缩放
+        controls.enablePan = false; // 禁用平移
+        controls.autoRotate = false; // 禁用内置的自动旋转，我们自己控制
         
-        // 更新投影矩阵
-        camera.updateProjectionMatrix();
+        // 监听用户交互
+        controls.addEventListener('start', () => {
+          autoRotate = false;
+          clearTimeout(autoRotateTimeout);
+        });
+        
+        controls.addEventListener('end', () => {
+          autoRotateTimeout = setTimeout(() => {
+            autoRotate = true;
+          }, RESUME_DELAY);
+        });
         
         function animate() {
           requestAnimationFrame(animate);
-          photoGroup.rotation.y += 0.004;
+          
+          if (autoRotate) {
+            photoGroup.rotation.y += ROTATION_SPEED;
+          }
+          
+          controls.update(); // 需要更新控制器
           renderer.render(scene, camera);
         }
 
