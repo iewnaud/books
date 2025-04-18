@@ -19,10 +19,12 @@ body {
   transform: translateX(-50%);
   font-size: 24px;
   color: #333;
-  animation: fadeIn 2s ease-out;
+  animation: fadeIn 2s ease-out forwards; /* 3. 调整动画，确保最终状态正确 */
   pointer-events: none;
   width: 90%;
   max-width: 900px;
+  text-align: center; /* 初始就设置居中 */
+  opacity: 0; /* 初始透明，动画结束后才显示 */
 }
 
 .main-text {
