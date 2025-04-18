@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <title>Books</title>
+  <!-- 1. 预加载字体 -->
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" as="style">
   <link href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       font-family: 'Caveat', cursive;
-      overflow: hidden;
     }
 
     #quote {
@@ -19,16 +19,18 @@
       transform: translateX(-50%);
       font-size: 24px;
       color: #333;
+      animation: fadeIn 2s ease-out forwards;
       pointer-events: none;
       width: 90%;
       max-width: 900px;
-      opacity: 1;
-      text-align: center;
+      opacity: 0; /* 初始透明 */
+      text-align: center; /* 仅影响直接子元素的默认对齐 */
     }
 
+    /* 明确控制子元素对齐 */
     .main-text {
       text-align: center;
-      display: block;
+      display: block; /* 改为 block 更符合语义 */
       width: 100%;
     }
 
@@ -36,10 +38,16 @@
       text-align: right;
       font-weight: bold;
       font-size: 20px;
-      margin-top: 10px;
+      margin-top: 10px; /* 增加间距 */
       opacity: 0.8;
       display: block;
       width: 100%;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
     }
   </style>
 </head>
@@ -52,20 +60,30 @@
       &mdash; Henry David Thoreau, <em>Walden</em>
     </div>
   </div>
-
+  
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+
   <script>
     const scene = new THREE.Scene();
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    scene.add(new THREE.DirectionalLight(0xffffff, 0.8));
+    // 环境光（提供基础亮度）
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // 白光，强度0.6
+    scene.add(ambientLight);
+    
+    // 方向光（类似太阳光，给点阴影感）
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(100, 200, 100); // 光源从上方偏右照下来
+    scene.add(directionalLight);
+    
+    // 环境光（加入轻微的蓝调效果）
     scene.add(new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.5));
-    scene.background = new THREE.Color(0xddeeff);
-
+    scene.background = new THREE.Color(0xddeeff);  // 柔和蓝天背景
+    
     const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
+    // 设置相机位置
     fetch('booklist.json')
       .then(response => response.json())
       .then(books => {
@@ -74,22 +92,30 @@
         const spacing = 20;
         const radius = (numPhotos * (photoWidth + spacing)) / (2 * Math.PI);
         const photoGroup = new THREE.Group();
+        const emojiBase = '🟠';
 
-        camera.position.set(0, 0, radius * 1.25);
+        // 确保相机位置和目标在加载物体前设置
+        camera.position.set(0, 0, radius * 1.25);  // 可以将此值调大，例如改成3，确保相机在物体外面
         camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         books.forEach((book, i) => {
           const texture = new THREE.TextureLoader().load(`assets/photos/${book.pinyin}.jpg`);
-          const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: false });
+          const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            side: THREE.DoubleSide,
+            transparent: true
+          });
           const geometry = new THREE.PlaneGeometry(photoWidth, 400);
           const photo = new THREE.Mesh(geometry, material);
 
           const angle = (i / numPhotos) * Math.PI * 2;
+
           photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
           photo.lookAt(new THREE.Vector3(0, 0, 0));
-          photo.rotateY(Math.PI);
+          photo.rotateY(Math.PI); // 翻转图片，正面朝外
           photoGroup.add(photo);
 
+          // 编号文本（大写字母）
           const canvas = document.createElement('canvas');
           canvas.width = 128;
           canvas.height = 64;
@@ -97,101 +123,50 @@
           ctx.fillStyle = '#000';
           ctx.font = 'bold 28px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(`🟠 ${i + 1}`, 64, 42);
+
+          // 获取拼音的首字母并转换成大写
+          const firstLetter = book.pinyin.charAt(0).toUpperCase();
+          ctx.fillText(`${emojiBase} ${firstLetter}`, 64, 42);
 
           const labelTexture = new THREE.CanvasTexture(canvas);
           const labelMaterial = new THREE.SpriteMaterial({ map: labelTexture, transparent: true });
           const label = new THREE.Sprite(labelMaterial);
           label.scale.set(120, 60, 1);
-          label.position.set(Math.cos(angle) * radius, 230, Math.sin(angle) * radius);
+          label.position.set(
+            Math.cos(angle) * radius,
+            230,
+            Math.sin(angle) * radius
+          );
           photoGroup.add(label);
         });
 
         scene.add(photoGroup);
-
-        // 旋转控制变量
-        let isDragging = false;
-        let previousMouseX = 0;
-        let rotationSpeed = 0.004;
-        let manualSpeed = 0;
-        let lastMoveTime = Date.now();
-
-        const deceleration = 0.0002; // 惯性减速率
-
-        const animate = () => {
+        
+        // 调整相机视野角度
+        camera.fov = 80;  // 增加视野角度，尝试 80 或更大的值，看效果
+        camera.updateProjectionMatrix();
+        
+        // 调整近远平面
+        camera.near = 0.1;  // 不要太小
+        camera.far = radius * 5;  // 增大远平面，确保可以看到远处的物体
+        
+        // 更新投影矩阵
+        camera.updateProjectionMatrix();
+        
+        function animate() {
           requestAnimationFrame(animate);
-
-          const now = Date.now();
-          const elapsed = now - lastMoveTime;
-
-          if (!isDragging) {
-            if (elapsed > 2000) {
-              // 自动旋转
-              photoGroup.rotation.y += rotationSpeed;
-            } else {
-              // 惯性旋转
-              photoGroup.rotation.y += manualSpeed;
-              manualSpeed *= (1 - deceleration * 60); // 帧率相关减速
-              if (Math.abs(manualSpeed) < 0.00001) manualSpeed = 0;
-            }
-          }
-
+          photoGroup.rotation.y += 0.004;
           renderer.render(scene, camera);
-        };
+        }
 
         animate();
-
-        const handleMouseDown = (event) => {
-          isDragging = true;
-          previousMouseX = event.clientX;
-        };
-
-        const handleMouseMove = (event) => {
-          if (!isDragging) return;
-          const deltaX = event.clientX - previousMouseX;
-          manualSpeed = deltaX * 0.0005;
-          photoGroup.rotation.y += manualSpeed;
-          previousMouseX = event.clientX;
-          lastMoveTime = Date.now();
-        };
-
-        const handleMouseUp = () => {
-          isDragging = false;
-        };
-
-        // 支持触摸板/触控手势
-        const handleTouchStart = (e) => {
-          isDragging = true;
-          previousMouseX = e.touches[0].clientX;
-        };
-
-        const handleTouchMove = (e) => {
-          if (!isDragging) return;
-          const deltaX = e.touches[0].clientX - previousMouseX;
-          manualSpeed = deltaX * 0.0005;
-          photoGroup.rotation.y += manualSpeed;
-          previousMouseX = e.touches[0].clientX;
-          lastMoveTime = Date.now();
-        };
-
-        const handleTouchEnd = () => {
-          isDragging = false;
-        };
-
-        window.addEventListener('mousedown', handleMouseDown);
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
-
-        window.addEventListener('touchstart', handleTouchStart);
-        window.addEventListener('touchmove', handleTouchMove);
-        window.addEventListener('touchend', handleTouchEnd);
-
-        window.addEventListener('resize', () => {
-          camera.aspect = window.innerWidth / window.innerHeight;
-          camera.updateProjectionMatrix();
-          renderer.setSize(window.innerWidth, window.innerHeight);
-        });
       });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
   </script>
 </body>
 </html>
