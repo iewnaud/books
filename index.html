@@ -95,7 +95,7 @@
         const emojiBase = '🟠';
 
         // 确保相机位置和目标在加载物体前设置
-        camera.position.set(0, 0, radius * 1.28);  // 可以将此值调大，例如改成3，确保相机在物体外面
+        camera.position.set(0, 0, radius * 1.25);  // 可以将此值调大，例如改成3，确保相机在物体外面
         camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         books.forEach((book, i) => {
@@ -138,6 +138,34 @@
             Math.sin(angle) * radius
           );
           photoGroup.add(label);
+
+          // 在圆圈内添加大写字母
+          const circleCanvas = document.createElement('canvas');
+          const circleCtx = circleCanvas.getContext('2d');
+          const circleRadius = 40;
+          circleCanvas.width = circleRadius * 2;
+          circleCanvas.height = circleRadius * 2;
+          circleCtx.fillStyle = '#FFA500';  // 橘色
+          circleCtx.beginPath();
+          circleCtx.arc(circleRadius, circleRadius, circleRadius, 0, Math.PI * 2);
+          circleCtx.fill();
+
+          circleCtx.fillStyle = '#FFFFFF'; // 白色字体
+          circleCtx.font = 'bold 20px sans-serif';
+          circleCtx.textAlign = 'center';
+          circleCtx.textBaseline = 'middle';
+          circleCtx.fillText(firstLetter, circleRadius, circleRadius);
+
+          const circleTexture = new THREE.CanvasTexture(circleCanvas);
+          const circleMaterial = new THREE.SpriteMaterial({ map: circleTexture, transparent: true });
+          const circle = new THREE.Sprite(circleMaterial);
+          circle.scale.set(80, 80, 1);
+          circle.position.set(
+            Math.cos(angle) * radius,
+            230,
+            Math.sin(angle) * radius
+          );
+          photoGroup.add(circle);
         });
 
         scene.add(photoGroup);
@@ -166,6 +194,63 @@
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // 鼠标拖动实现
+    let isMouseDown = false;
+    let mouseX = 0;
+    let mouseY = 0;
+    let rotationX = 0;
+    let rotationY = 0;
+
+    renderer.domElement.addEventListener('mousedown', (event) => {
+      isMouseDown = true;
+      mouseX = event.clientX;
+      mouseY = event.clientY;
+    });
+
+    renderer.domElement.addEventListener('mousemove', (event) => {
+      if (!isMouseDown) return;
+      const dx = event.clientX - mouseX;
+      const dy = event.clientY - mouseY;
+      rotationX += dy * 0.002;
+      rotationY += dx * 0.002;
+      photoGroup.rotation.x = rotationX;
+      photoGroup.rotation.y = rotationY;
+      mouseX = event.clientX;
+      mouseY = event.clientY;
+    });
+
+    renderer.domElement.addEventListener('mouseup', () => {
+      isMouseDown = false;
+    });
+
+    renderer.domElement.addEventListener('mouseleave', () => {
+      isMouseDown = false;
+    });
+
+    // 为了拖动后加上惯性效果
+    let inertiaRotationX = 0;
+    let inertiaRotationY = 0;
+    let inertiaTimer = null;
+
+    function applyInertia() {
+      if (Math.abs(inertiaRotationX) > 0.0001 || Math.abs(inertiaRotationY) > 0.0001) {
+        rotationX += inertiaRotationX;
+        rotationY += inertiaRotationY;
+        inertiaRotationX *= 0.98;
+        inertiaRotationY *= 0.98;
+        photoGroup.rotation.x = rotationX;
+        photoGroup.rotation.y = rotationY;
+        inertiaTimer = requestAnimationFrame(applyInertia);
+      }
+    }
+
+    window.addEventListener('mouseup', () => {
+      if (inertiaTimer) cancelAnimationFrame(inertiaTimer);
+      inertiaRotationX = (mouseX - event.clientX) * 0.002;
+      inertiaRotationY = (mouseY - event.clientY) * 0.002;
+      applyInertia();
     });
   </script>
 </body>
