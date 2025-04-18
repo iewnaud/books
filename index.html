@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <title>Books</title>
-  <!-- 1. 预加载字体 -->
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" as="style">
   <link href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       font-family: 'Caveat', cursive;
-      overflow: hidden; /* 防止页面滚动 */
     }
 
     #quote {
@@ -24,26 +22,23 @@
       pointer-events: none;
       width: 90%;
       max-width: 900px;
-      opacity: 0; /* 初始透明 */
-      text-align: center; /* 仅影响直接子元素的默认对齐 */
-      z-index: 10;
+      opacity: 0;
     }
 
-    /* 明确控制子元素对齐 */
     .main-text {
-      text-align: center;
-      display: block; /* 改为 block 更符合语义 */
+      display: block;
       width: 100%;
+      text-align: center;
     }
 
     .quote-attribution {
-      text-align: right;
       font-weight: bold;
       font-size: 20px;
-      margin-top: 10px; /* 增加间距 */
+      margin-top: 10px;
       opacity: 0.8;
       display: block;
       width: 100%;
+      text-align: right;
     }
 
     @keyframes fadeIn {
@@ -62,37 +57,26 @@
       &mdash; Henry David Thoreau, <em>Walden</em>
     </div>
   </div>
-  
+
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 
   <script>
     const scene = new THREE.Scene();
-    // 环境光（提供基础亮度）
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // 白光，强度0.6
-    scene.add(ambientLight);
-    
-    // 方向光（类似太阳光，给点阴影感）
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(100, 200, 100); // 光源从上方偏右照下来
-    scene.add(directionalLight);
-    
-    // 如果想要更艺术，可以加一个轻微蓝调的环境光
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    scene.add(new THREE.DirectionalLight(0xffffff, 0.8).position.set(100, 200, 100));
     scene.add(new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.5));
-    scene.background = new THREE.Color(0xddeeff);  // 柔和蓝天背景
-    
+    scene.background = new THREE.Color(0xddeeff);
+
     const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // 初始化控制器
-    let controls;
+    let rotationPaused = false;
+    let pauseTimeout = null;
+    let lastMouseX = null;
+    let isDragging = false;
     let photoGroup;
-    let autoRotate = true;
-    let autoRotateTimeout;
-    const ROTATION_SPEED = 0.004;
-    const RESUME_DELAY = 3000; // 3秒后恢复自动旋转
 
     fetch('booklist.json')
       .then(response => response.json())
@@ -104,28 +88,21 @@
         photoGroup = new THREE.Group();
         const emojiBase = '🟠';
 
-        // 设置相机位置
         camera.position.set(0, 0, radius * 1.25);
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        camera.lookAt(0, 0, 0);
 
         books.forEach((book, i) => {
           const texture = new THREE.TextureLoader().load(`assets/photos/${book.pinyin}.jpg`);
-          const material = new THREE.MeshBasicMaterial({
-            map: texture,
-            side: THREE.DoubleSide,
-            transparent: true
-          });
+          const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
           const geometry = new THREE.PlaneGeometry(photoWidth, 400);
           const photo = new THREE.Mesh(geometry, material);
 
           const angle = (i / numPhotos) * Math.PI * 2;
-
           photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-          photo.lookAt(new THREE.Vector3(0, 0, 0));
-          photo.rotateY(Math.PI); // ✅ 翻转图片，正面朝外
+          photo.lookAt(0, 0, 0);
+          photo.rotateY(Math.PI);
           photoGroup.add(photo);
 
-          // 编号文本
           const canvas = document.createElement('canvas');
           canvas.width = 128;
           canvas.height = 64;
@@ -139,53 +116,53 @@
           const labelMaterial = new THREE.SpriteMaterial({ map: labelTexture, transparent: true });
           const label = new THREE.Sprite(labelMaterial);
           label.scale.set(120, 60, 1);
-          label.position.set(
-            Math.cos(angle) * radius,
-            230,
-            Math.sin(angle) * radius
-          );
+          label.position.set(Math.cos(angle) * radius, 230, Math.sin(angle) * radius);
           photoGroup.add(label);
         });
 
         scene.add(photoGroup);
-        
-        // 调整相机参数
+
         camera.fov = 80;
         camera.near = 0.1;
         camera.far = radius * 5;
         camera.updateProjectionMatrix();
-        
-        // 初始化轨道控制器
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableZoom = false; // 禁用缩放
-        controls.enablePan = false; // 禁用平移
-        controls.autoRotate = false; // 禁用内置的自动旋转，我们自己控制
-        
-        // 监听用户交互
-        controls.addEventListener('start', () => {
-          autoRotate = false;
-          clearTimeout(autoRotateTimeout);
-        });
-        
-        controls.addEventListener('end', () => {
-          autoRotateTimeout = setTimeout(() => {
-            autoRotate = true;
-          }, RESUME_DELAY);
-        });
-        
-        function animate() {
-          requestAnimationFrame(animate);
-          
-          if (autoRotate) {
-            photoGroup.rotation.y += ROTATION_SPEED;
-          }
-          
-          controls.update(); // 需要更新控制器
-          renderer.render(scene, camera);
-        }
 
         animate();
       });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (!rotationPaused && photoGroup) {
+        photoGroup.rotation.y += 0.004;
+      }
+      renderer.render(scene, camera);
+    }
+
+    renderer.domElement.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      lastMouseX = e.clientX;
+    });
+
+    renderer.domElement.addEventListener('mousemove', (e) => {
+      if (!isDragging || !photoGroup) return;
+      const deltaX = e.clientX - lastMouseX;
+      lastMouseX = e.clientX;
+      photoGroup.rotation.y += deltaX * 0.005;
+
+      rotationPaused = true;
+      clearTimeout(pauseTimeout);
+      pauseTimeout = setTimeout(() => {
+        rotationPaused = false;
+      }, 3000);
+    });
+
+    renderer.domElement.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    renderer.domElement.addEventListener('mouseleave', () => {
+      isDragging = false;
+    });
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
