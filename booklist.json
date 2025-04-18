@@ -1,5 +1,4 @@
-[
-  { "title": "安娜卡列尼娜", "pinyin": "annakalienina" },
+[ { "title": "安娜卡列尼娜", "pinyin": "annakalienina" },
   { "title": "傲慢与偏见", "pinyin": "aomanyupianjian" },
   { "title": "白鹿原", "pinyin": "bailuyuan" },
   { "title": "百年孤独", "pinyin": "bainiangudu" },
@@ -29,5 +28,18 @@
   { "title": "猎人笔记", "pinyin": "lierenbiji" },
   { "title": "米格尔街", "pinyin": "migeerjie" },
   { "title": "穆斯林的葬礼", "pinyin": "musilindezangli" },
-  { "title": "你好安娜", "pinyin": "nihaoanna" }
+  { "title": "你好安娜", "pinyin": "nihaoanna" },
+  { "title": "拍案惊奇", "pinyin": "paianjingqi" }
+  { "title": "飘", "pinyin": "piao" }
+  { "title": "平凡的世界", "pinyin": "pingfandeshijie" }
+  { "title": "千里江山图", "pinyin": "qianlijiangshantu" }
+  { "title": "秦腔", "pinyin": "qinqiang" }
+  { "title": "人生海海", "pinyin": "renshenghaihai" }
+  { "title": "撒哈拉的故事", "pinyin": "sahaladegushi" }
+  { "title": "三体", "pinyin": "santi" }
+  { "title": "上帝掷骰子吗", "pinyin": "shangdizhitouzima" }
+  { "title": "生死疲劳", "pinyin": "shengsipilao" }
+  { "title": "苔丝", "pinyin": "taisi" }
+  { "title": "它来到我们中间寻找骑手", "pinyin": "talaidaowomenzhongjianxunzhaoqishou" }
+  { "title": "推拿", "pinyin": "tuina" }
 ]
