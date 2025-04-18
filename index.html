@@ -8,44 +8,36 @@
     
 body {
   margin: 0;
-  overflow: hidden;
-  font-family: Georgia, 'Times New Roman', serif;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  height: 100vh;
+  font-family: 'Caveat', cursive;
 }
 
 #quote {
-  margin-top: 80px;
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 24px;
   color: #333;
-  font-family: 'Caveat', cursive;
-  letter-spacing: 0.5px;
-  line-height: 1.6;
-  text-align: left;
-  max-width: 80%;
   animation: fadeIn 2s ease-out;
   pointer-events: none;
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-  gap: 30px;
+  width: 90%;
+  max-width: 900px;
 }
 
 .main-text {
-  flex: 1 1 auto;
-  min-width: 300px;
+  text-align: center; /* 第一行居中 */
+  display: inline-block;
+  width: 100%;
 }
 
 .quote-attribution {
-  flex-shrink: 0;
-  white-space: nowrap;
-  margin-left: 20px;
+  text-align: right; /* 引用部分右对齐 */
   font-weight: bold;
-  font-size: 22px;
-  align-self: flex-end;
-  opacity: 0.85;
+  font-size: 20px;
+  margin-left: 20px;
+  opacity: 0.8;
+  display: inline-block;
+  width: 100%;
 }
 
 @keyframes fadeIn {
