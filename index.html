@@ -80,8 +80,11 @@
 
         books.forEach((book, i) => {
           const texture = new THREE.TextureLoader().load(`assets/photos/${book.pinyin}.jpg`);
+          texture.minFilter = THREE.LinearFilter;
+          texture.magFilter = THREE.LinearFilter;
+          texture.generateMipmaps = false;
           const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
-          const geometry = new THREE.PlaneGeometry(photoWidth, 400);
+          const geometry = new THREE.PlaneGeometry(photoWidth, 400, 2, 2);
           const photo = new THREE.Mesh(geometry, material);
 
           const angle = (i / numPhotos) * Math.PI * 2;
