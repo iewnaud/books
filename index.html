@@ -108,6 +108,8 @@
         });
 
         scene.add(photoGroup);
+        // 保证编号1那张图最先出现在画面正前方
+        photoGroup.rotation.y = -((0 / numPhotos) * Math.PI * 2);
 
         // 旋转控制变量
         let isDragging = false;
