@@ -113,7 +113,7 @@
         // 旋转控制变量
         let isDragging = false;
         let previousMouseX = 0;
-        let rotationSpeed = 0.004;
+        let rotationSpeed = 0;
         let manualSpeed = 0;
         let lastMoveTime = Date.now();
 
@@ -141,6 +141,10 @@
         };
 
         animate();
+        // 等待5秒后启动自动旋转
+        setTimeout(() => {
+          rotationSpeed = 0.004;
+        }, 5000);
 
         const handleMouseDown = (event) => {
           isDragging = true;
