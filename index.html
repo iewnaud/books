@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <title>Books - 平面展示</title>
+  <title>Books - Read</title>
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" as="style">
   <link href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" rel="stylesheet">
   <style>
@@ -57,7 +57,7 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 60px 40px; /* 增加行间距给标签留出空间 */
+      gap: 60px 40px;
       box-sizing: border-box;
     }
 
@@ -75,53 +75,65 @@
       transform: translateY(-5px);
     }
 
-    /* 标签容器 - 在图片上方 */
+    /* 标签容器 - 同心圆设计 */
     .book-label-container {
       margin-bottom: 15px;
       display: flex;
       justify-content: center;
       width: 100%;
+      position: relative;
     }
 
-    .book-label {
+    /* 外圆（大圆） */
+    .book-label-outer {
       background: linear-gradient(135deg, #ff8c00, #ff6b00);
-      color: white;
-      font-family: 'Arial', sans-serif;
-      font-weight: bold;
-      font-size: 24px;
-      width: 70px;
-      height: 70px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4), 0 4px 10px rgba(0, 0, 0, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 10;
       position: relative;
       transition: all 0.3s ease;
     }
 
-    .book-label:hover {
+    .book-label-outer:hover {
       transform: scale(1.1);
       box-shadow: 0 8px 25px rgba(255, 107, 0, 0.6), 0 6px 15px rgba(0, 0, 0, 0.3);
     }
 
-    .book-label-content {
+    /* 内圆（小圆） */
+    .book-label-inner {
+      background: white;
+      width: 60px; /* 略小于外圆 */
+      height: 60px; /* 略小于外圆 */
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1), 0 2px 5px rgba(0, 0, 0, 0.1);
+      border: 2px solid rgba(255, 107, 0, 0.3);
     }
 
-    .book-emoji {
-      font-size: 22px;
-      line-height: 1;
-    }
-
+    /* 数字 */
     .book-number {
-      font-size: 26px;
+      font-family: 'Arial', sans-serif;
+      font-weight: bold;
+      font-size: 28px;
+      color: #ff6b00;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
       line-height: 1;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    /* 可选的：在数字上方添加橙点 */
+    .book-label-inner::before {
+      content: "●";
+      position: absolute;
+      top: 8px;
+      color: #ff8c00;
+      font-size: 14px;
+      opacity: 0.7;
     }
 
     .book-image {
@@ -136,18 +148,6 @@
 
     .book-image:hover {
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
-    }
-
-    /* 可选：添加标题区域（如果需要显示书名） */
-    .book-title {
-      margin-top: 15px;
-      font-size: 20px;
-      font-weight: bold;
-      color: #333;
-      text-align: center;
-      max-width: 100%;
-      padding: 0 10px;
-      opacity: 0.9;
     }
 
     /* 响应式调整 */
@@ -181,18 +181,23 @@
         height: 350px;
       }
       
-      .book-label {
-        width: 60px;
-        height: 60px;
-        font-size: 20px;
+      .book-label-outer {
+        width: 70px;
+        height: 70px;
       }
       
-      .book-emoji {
-        font-size: 18px;
+      .book-label-inner {
+        width: 52px;
+        height: 52px;
       }
       
       .book-number {
-        font-size: 22px;
+        font-size: 24px;
+      }
+      
+      .book-label-inner::before {
+        font-size: 12px;
+        top: 6px;
       }
     }
 
@@ -210,36 +215,45 @@
         height: 280px;
       }
       
-      .book-label {
-        width: 50px;
-        height: 50px;
-        font-size: 18px;
+      .book-label-outer {
+        width: 60px;
+        height: 60px;
         margin-bottom: 10px;
       }
       
-      .book-emoji {
-        font-size: 16px;
+      .book-label-inner {
+        width: 44px;
+        height: 44px;
+      }
+      
+      .book-number {
+        font-size: 22px;
+      }
+      
+      .book-label-inner::before {
+        font-size: 10px;
+        top: 5px;
+      }
+    }
+    
+    @media (max-width: 360px) {
+      .book-label-outer {
+        width: 55px;
+        height: 55px;
+      }
+      
+      .book-label-inner {
+        width: 40px;
+        height: 40px;
       }
       
       .book-number {
         font-size: 20px;
       }
-    }
-    
-    /* 为小号标签优化 */
-    @media (max-width: 360px) {
-      .book-label {
-        width: 45px;
-        height: 45px;
-        font-size: 16px;
-      }
       
-      .book-emoji {
-        font-size: 14px;
-      }
-      
-      .book-number {
-        font-size: 18px;
+      .book-label-inner::before {
+        font-size: 9px;
+        top: 4px;
       }
     }
   </style>
@@ -272,39 +286,37 @@
           const labelContainer = document.createElement('div');
           labelContainer.className = 'book-label-container';
           
-          // 创建标签 - 现在在图片上方
-          const label = document.createElement('div');
-          label.className = 'book-label';
-          label.innerHTML = `
-            <div class="book-label-content">
-              <span class="book-emoji">🟠</span>
-              <span class="book-number">${index + 1}</span>
-            </div>
-          `;
+          // 创建同心圆标签
+          const labelOuter = document.createElement('div');
+          labelOuter.className = 'book-label-outer';
+          
+          const labelInner = document.createElement('div');
+          labelInner.className = 'book-label-inner';
+          
+          const number = document.createElement('div');
+          number.className = 'book-number';
+          number.textContent = index + 1;
+          
+          // 组合同心圆
+          labelInner.appendChild(number);
+          labelOuter.appendChild(labelInner);
+          labelContainer.appendChild(labelOuter);
           
           // 创建图片
           const img = document.createElement('img');
           img.className = 'book-image';
           img.src = `assets/photos/${book.pinyin}.jpg`;
           img.alt = book.title || `书籍 ${index + 1}`;
-          img.loading = 'lazy'; // 懒加载优化
-          
-          // 可选：创建标题（如果需要）
-          // const title = document.createElement('div');
-          // title.className = 'book-title';
-          // title.textContent = book.title || `书籍 ${index + 1}`;
+          img.loading = 'lazy';
           
           // 图片加载错误处理
           img.onerror = function() {
-            // 如果图片加载失败，使用占位图
             this.onerror = null;
             this.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="280" height="400" viewBox="0 0 280 400"><rect width="100%" height="100%" fill="%23f0f0f0"/><text x="50%" y="50%" font-family="Arial" font-size="20" text-anchor="middle" fill="%23999">No Image</text></svg>';
           };
           
-          labelContainer.appendChild(label);
           bookItem.appendChild(labelContainer);
           bookItem.appendChild(img);
-          // bookItem.appendChild(title); // 如果需要标题，取消注释这行
           container.appendChild(bookItem);
         });
       })
@@ -314,7 +326,7 @@
         container.innerHTML = '<div style="text-align: center; font-size: 24px; color: #666; padding: 50px;">无法加载书籍数据，请检查网络连接</div>';
       });
       
-    // 添加平滑滚动效果
+    // 平滑滚动效果
     window.addEventListener('wheel', function(e) {
       e.preventDefault();
       window.scrollBy({
@@ -327,19 +339,12 @@
     function adjustContainerPosition() {
       const quote = document.getElementById('quote');
       const container = document.getElementById('book-container');
-      const quoteHeight = quote.offsetHeight;
       const quoteBottom = quote.getBoundingClientRect().bottom + window.scrollY;
-      
       container.style.top = (quoteBottom + 40) + 'px';
     }
     
-    // 初始调整
     setTimeout(adjustContainerPosition, 100);
-    
-    // 窗口大小变化时调整
     window.addEventListener('resize', adjustContainerPosition);
-    
-    // 图片加载完成后调整
     window.addEventListener('load', adjustContainerPosition);
   </script>
 </body>
