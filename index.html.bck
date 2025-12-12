@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>Books</title>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Caveat', cursive;
+      overflow: hidden;
+    }
+
+    #quote {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      color: #333;
+      pointer-events: none;
+      width: 90%;
+      max-width: 900px;
+      opacity: 1;
+      text-align: center;
+    }
+
+    .main-text {
+      text-align: center;
+      display: block;
+      width: 100%;
+    }
+
+    .quote-attribution {
+      text-align: right;
+      font-weight: bold;
+      font-size: 20px;
+      margin-top: 10px;
+      opacity: 0.8;
+      display: block;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="quote">
+    <div class="main-text">
+      If we must build a bridge, let us throw one arch at least over the darker gulf of ignorance which surrounds us.
+    </div>
+    <div class="quote-attribution">
+      &mdash; Henry David Thoreau, <em>Walden</em>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    scene.add(new THREE.DirectionalLight(0xffffff, 0.8));
+    scene.add(new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.5));
+    scene.background = new THREE.Color(0xddeeff);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    fetch('booklist.json')
+      .then(response => response.json())
+      .then(books => {
+        const numPhotos = books.length;
+        const photoWidth = 280;
+        const spacing = 20;
+        const radius = (numPhotos * (photoWidth + spacing)) / (2 * Math.PI);
+        const photoGroup = new THREE.Group();
+
+        camera.position.set(0, 0, radius * 1.35);
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+        books.forEach((book, i) => {
+          const texture = new THREE.TextureLoader().load(`assets/photos/${book.pinyin}.jpg`);
+          texture.minFilter = THREE.LinearFilter;
+          texture.magFilter = THREE.LinearFilter;
+          texture.generateMipmaps = false;
+          const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
+          const geometry = new THREE.PlaneGeometry(photoWidth, 400, 2, 2);
+          const photo = new THREE.Mesh(geometry, material);
+
+          const angle = (i / numPhotos) * Math.PI * 2;
+          photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+          photo.lookAt(new THREE.Vector3(0, 0, 0));
+          photo.rotateY(Math.PI);
+          photoGroup.add(photo);
+
+          const canvas = document.createElement('canvas');
+          canvas.width = 128;
+          canvas.height = 64;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#000';
+          ctx.font = 'bold 28px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(`🟠 ${i + 1}`, 64, 42);
+
+          const labelTexture = new THREE.CanvasTexture(canvas);
+          const labelMaterial = new THREE.SpriteMaterial({ map: labelTexture, transparent: true });
+          const label = new THREE.Sprite(labelMaterial);
+          label.scale.set(120, 60, 1);
+          label.position.set(Math.cos(angle) * radius, 230, Math.sin(angle) * radius);
+          photoGroup.add(label);
+    
+        });
+
+        scene.add(photoGroup);
+        photoGroup.rotation.y = -Math.PI / 2;
+        
+        // 旋转控制变量
+        let isDragging = false;
+        let previousMouseX = 0;
+        let rotationSpeed = 0;
+        let manualSpeed = 0;
+        let lastMoveTime = Date.now();
+
+        const deceleration = 0.0002; // 惯性减速率
+
+        const animate = () => {
+          requestAnimationFrame(animate);
+
+          const now = Date.now();
+          const elapsed = now - lastMoveTime;
+
+          if (!isDragging) {
+            if (elapsed > 2000) {
+              // 自动旋转
+              photoGroup.rotation.y += rotationSpeed;
+            } else {
+              // 惯性旋转
+              photoGroup.rotation.y += manualSpeed;
+              manualSpeed *= (1 - deceleration * 60); // 帧率相关减速
+              if (Math.abs(manualSpeed) < 0.00001) manualSpeed = 0;
+            }
+          }
+
+          renderer.render(scene, camera);
+        };
+
+        animate();
+        // 等待5秒后启动自动旋转
+        setTimeout(() => {
+          rotationSpeed = 0.003;
+        }, 100);
+
+        const handleMouseDown = (event) => {
+          isDragging = true;
+          previousMouseX = event.clientX;
+        };
+
+        const handleMouseMove = (event) => {
+          if (!isDragging) return;
+          const deltaX = event.clientX - previousMouseX;
+          manualSpeed = deltaX * 0.0005;
+          photoGroup.rotation.y += manualSpeed;
+          previousMouseX = event.clientX;
+          lastMoveTime = Date.now();
+        };
+
+        const handleMouseUp = () => {
+          isDragging = false;
+        };
+
+        // 支持触摸板/触控手势
+        const handleTouchStart = (e) => {
+          isDragging = true;
+          previousMouseX = e.touches[0].clientX;
+        };
+
+        const handleTouchMove = (e) => {
+          if (!isDragging) return;
+          const deltaX = e.touches[0].clientX - previousMouseX;
+          manualSpeed = deltaX * 0.0005;
+          photoGroup.rotation.y += manualSpeed;
+          previousMouseX = e.touches[0].clientX;
+          lastMoveTime = Date.now();
+        };
+
+        const handleTouchEnd = () => {
+          isDragging = false;
+        };
+
+        window.addEventListener('mousedown', handleMouseDown);
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+
+        window.addEventListener('touchstart', handleTouchStart);
+        window.addEventListener('touchmove', handleTouchMove);
+        window.addEventListener('touchend', handleTouchEnd);
+
+        window.addEventListener('resize', () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+      });
+  </script>
+</body>
+</html>
