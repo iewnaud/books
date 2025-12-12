@@ -2,44 +2,170 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <title>Books</title>
+  <title>Books - 平面展示</title>
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" as="style">
   <link href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       font-family: 'Caveat', cursive;
-      overflow: hidden;
+      background: linear-gradient(135deg, #f5f7fa 0%, #ddeeff 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
     }
 
     #quote {
-      position: absolute;
-      top: 80px;
+      position: fixed;
+      top: 40px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 24px;
       color: #333;
-      pointer-events: none;
       width: 90%;
       max-width: 900px;
       opacity: 1;
       text-align: center;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px 40px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      z-index: 100;
     }
 
     .main-text {
       text-align: center;
       display: block;
       width: 100%;
+      margin-bottom: 10px;
     }
 
     .quote-attribution {
       text-align: right;
       font-weight: bold;
       font-size: 20px;
-      margin-top: 10px;
       opacity: 0.8;
       display: block;
       width: 100%;
+    }
+
+    #book-container {
+      position: absolute;
+      top: 180px;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+      box-sizing: border-box;
+    }
+
+    .book-item {
+      position: relative;
+      width: 280px;
+      margin-bottom: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .book-item:hover {
+      transform: translateY(-5px);
+    }
+
+    .book-image {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .book-label {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 140, 0, 0.9);
+      color: white;
+      font-family: sans-serif;
+      font-weight: bold;
+      font-size: 28px;
+      padding: 12px 20px;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      min-width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .book-label::before {
+      content: "🟠";
+      margin-right: 5px;
+      font-size: 20px;
+    }
+
+    .book-number {
+      font-size: 28px;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 1200px) {
+      #book-container {
+        gap: 30px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #quote {
+        top: 20px;
+        padding: 15px 25px;
+        font-size: 18px;
+      }
+      
+      .quote-attribution {
+        font-size: 16px;
+      }
+      
+      #book-container {
+        top: 150px;
+        gap: 20px;
+      }
+      
+      .book-item {
+        width: 250px;
+      }
+      
+      .book-image {
+        height: 350px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #book-container {
+        gap: 15px;
+        padding: 10px;
+      }
+      
+      .book-item {
+        width: 45%;
+      }
+      
+      .book-image {
+        height: 300px;
+      }
+      
+      .book-label {
+        font-size: 22px;
+        padding: 8px 15px;
+        min-width: 40px;
+        height: 40px;
+      }
+      
+      .book-number {
+        font-size: 22px;
+      }
     }
   </style>
 </head>
@@ -53,154 +179,77 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <div id="book-container"></div>
+
   <script>
-    const scene = new THREE.Scene();
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    scene.add(new THREE.DirectionalLight(0xffffff, 0.8));
-    scene.add(new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.5));
-    scene.background = new THREE.Color(0xddeeff);
-
-    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
+    // 加载书籍数据
     fetch('booklist.json')
       .then(response => response.json())
       .then(books => {
-        const numPhotos = books.length;
-        const photoWidth = 280;
-        const spacing = 20;
-        const radius = (numPhotos * (photoWidth + spacing)) / (2 * Math.PI);
-        const photoGroup = new THREE.Group();
-
-        camera.position.set(0, 0, radius * 1.35);
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
-
-        books.forEach((book, i) => {
-          const texture = new THREE.TextureLoader().load(`assets/photos/${book.pinyin}.jpg`);
-          texture.minFilter = THREE.LinearFilter;
-          texture.magFilter = THREE.LinearFilter;
-          texture.generateMipmaps = false;
-          const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
-          const geometry = new THREE.PlaneGeometry(photoWidth, 400, 2, 2);
-          const photo = new THREE.Mesh(geometry, material);
-
-          const angle = (i / numPhotos) * Math.PI * 2;
-          photo.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-          photo.lookAt(new THREE.Vector3(0, 0, 0));
-          photo.rotateY(Math.PI);
-          photoGroup.add(photo);
-
-          const canvas = document.createElement('canvas');
-          canvas.width = 128;
-          canvas.height = 64;
-          const ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#000';
-          ctx.font = 'bold 28px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(`🟠 ${i + 1}`, 64, 42);
-
-          const labelTexture = new THREE.CanvasTexture(canvas);
-          const labelMaterial = new THREE.SpriteMaterial({ map: labelTexture, transparent: true });
-          const label = new THREE.Sprite(labelMaterial);
-          label.scale.set(120, 60, 1);
-          label.position.set(Math.cos(angle) * radius, 230, Math.sin(angle) * radius);
-          photoGroup.add(label);
-    
-        });
-
-        scene.add(photoGroup);
-        photoGroup.rotation.y = -Math.PI / 2;
+        const container = document.getElementById('book-container');
         
-        // 旋转控制变量
-        let isDragging = false;
-        let previousMouseX = 0;
-        let rotationSpeed = 0;
-        let manualSpeed = 0;
-        let lastMoveTime = Date.now();
-
-        const deceleration = 0.0002; // 惯性减速率
-
-        const animate = () => {
-          requestAnimationFrame(animate);
-
-          const now = Date.now();
-          const elapsed = now - lastMoveTime;
-
-          if (!isDragging) {
-            if (elapsed > 2000) {
-              // 自动旋转
-              photoGroup.rotation.y += rotationSpeed;
-            } else {
-              // 惯性旋转
-              photoGroup.rotation.y += manualSpeed;
-              manualSpeed *= (1 - deceleration * 60); // 帧率相关减速
-              if (Math.abs(manualSpeed) < 0.00001) manualSpeed = 0;
-            }
-          }
-
-          renderer.render(scene, camera);
-        };
-
-        animate();
-        // 等待5秒后启动自动旋转
-        setTimeout(() => {
-          rotationSpeed = 0.003;
-        }, 100);
-
-        const handleMouseDown = (event) => {
-          isDragging = true;
-          previousMouseX = event.clientX;
-        };
-
-        const handleMouseMove = (event) => {
-          if (!isDragging) return;
-          const deltaX = event.clientX - previousMouseX;
-          manualSpeed = deltaX * 0.0005;
-          photoGroup.rotation.y += manualSpeed;
-          previousMouseX = event.clientX;
-          lastMoveTime = Date.now();
-        };
-
-        const handleMouseUp = () => {
-          isDragging = false;
-        };
-
-        // 支持触摸板/触控手势
-        const handleTouchStart = (e) => {
-          isDragging = true;
-          previousMouseX = e.touches[0].clientX;
-        };
-
-        const handleTouchMove = (e) => {
-          if (!isDragging) return;
-          const deltaX = e.touches[0].clientX - previousMouseX;
-          manualSpeed = deltaX * 0.0005;
-          photoGroup.rotation.y += manualSpeed;
-          previousMouseX = e.touches[0].clientX;
-          lastMoveTime = Date.now();
-        };
-
-        const handleTouchEnd = () => {
-          isDragging = false;
-        };
-
-        window.addEventListener('mousedown', handleMouseDown);
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
-
-        window.addEventListener('touchstart', handleTouchStart);
-        window.addEventListener('touchmove', handleTouchMove);
-        window.addEventListener('touchend', handleTouchEnd);
-
-        window.addEventListener('resize', () => {
-          camera.aspect = window.innerWidth / window.innerHeight;
-          camera.updateProjectionMatrix();
-          renderer.setSize(window.innerWidth, window.innerHeight);
+        books.forEach((book, index) => {
+          // 创建书籍元素
+          const bookItem = document.createElement('div');
+          bookItem.className = 'book-item';
+          
+          // 创建标签
+          const label = document.createElement('div');
+          label.className = 'book-label';
+          label.innerHTML = `<span class="book-number">${index + 1}</span>`;
+          
+          // 创建图片
+          const img = document.createElement('img');
+          img.className = 'book-image';
+          img.src = `assets/photos/${book.pinyin}.jpg`;
+          img.alt = book.title || `书籍 ${index + 1}`;
+          img.loading = 'lazy'; // 懒加载优化
+          
+          // 图片加载错误处理
+          img.onerror = function() {
+            // 如果图片加载失败，使用占位图
+            this.onerror = null;
+            this.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="280" height="400" viewBox="0 0 280 400"><rect width="100%" height="100%" fill="%23f0f0f0"/><text x="50%" y="50%" font-family="Arial" font-size="20" text-anchor="middle" fill="%23999">No Image</text></svg>';
+          };
+          
+          bookItem.appendChild(label);
+          bookItem.appendChild(img);
+          container.appendChild(bookItem);
         });
+      })
+      .catch(error => {
+        console.error('加载书籍数据时出错:', error);
+        const container = document.getElementById('book-container');
+        container.innerHTML = '<div style="text-align: center; font-size: 24px; color: #666; padding: 50px;">无法加载书籍数据，请检查网络连接</div>';
       });
+      
+    // 添加平滑滚动效果
+    window.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      window.scrollBy({
+        top: e.deltaY * 0.5,
+        behavior: 'smooth'
+      });
+    }, { passive: false });
+    
+    // 响应式调整容器位置
+    function adjustContainerPosition() {
+      const quote = document.getElementById('quote');
+      const container = document.getElementById('book-container');
+      const quoteHeight = quote.offsetHeight;
+      const quoteBottom = quote.getBoundingClientRect().bottom + window.scrollY;
+      
+      container.style.top = (quoteBottom + 40) + 'px';
+    }
+    
+    // 初始调整
+    setTimeout(adjustContainerPosition, 100);
+    
+    // 窗口大小变化时调整
+    window.addEventListener('resize', adjustContainerPosition);
+    
+    // 图片加载完成后调整
+    window.addEventListener('load', adjustContainerPosition);
   </script>
 </body>
 </html>
