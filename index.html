@@ -85,29 +85,37 @@
       position: absolute;
       top: 20px;
       left: 20px;
-      background: rgba(255, 140, 0, 0.9);
+      background: linear-gradient(135deg, #ff8c00, #ff6b00);
       color: white;
-      font-family: sans-serif;
+      font-family: 'Arial', sans-serif;
       font-weight: bold;
-      font-size: 28px;
-      padding: 12px 20px;
+      font-size: 24px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      min-width: 50px;
-      height: 50px;
+      box-shadow: 0 4px 15px rgba(255, 107, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
+      z-index: 10;
     }
 
-    .book-label::before {
-      content: "🟠";
-      margin-right: 5px;
+    .book-label-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .book-emoji {
       font-size: 20px;
+      line-height: 1;
     }
 
     .book-number {
-      font-size: 28px;
+      font-size: 24px;
+      line-height: 1;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     }
 
     /* 响应式调整 */
@@ -140,6 +148,20 @@
       .book-image {
         height: 350px;
       }
+      
+      .book-label {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+      }
+      
+      .book-emoji {
+        font-size: 16px;
+      }
+      
+      .book-number {
+        font-size: 20px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -157,14 +179,36 @@
       }
       
       .book-label {
-        font-size: 22px;
-        padding: 8px 15px;
-        min-width: 40px;
-        height: 40px;
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+        top: 15px;
+        left: 15px;
+      }
+      
+      .book-emoji {
+        font-size: 14px;
       }
       
       .book-number {
-        font-size: 22px;
+        font-size: 18px;
+      }
+    }
+    
+    /* 为小号标签优化 */
+    @media (max-width: 360px) {
+      .book-label {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+      }
+      
+      .book-emoji {
+        font-size: 12px;
+      }
+      
+      .book-number {
+        font-size: 16px;
       }
     }
   </style>
@@ -193,10 +237,15 @@
           const bookItem = document.createElement('div');
           bookItem.className = 'book-item';
           
-          // 创建标签
+          // 创建标签 - 现在使用圆形
           const label = document.createElement('div');
           label.className = 'book-label';
-          label.innerHTML = `<span class="book-number">${index + 1}</span>`;
+          label.innerHTML = `
+            <div class="book-label-content">
+              <span class="book-emoji">🟠</span>
+              <span class="book-number">${index + 1}</span>
+            </div>
+          `;
           
           // 创建图片
           const img = document.createElement('img');
