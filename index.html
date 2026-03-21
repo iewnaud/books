@@ -20,11 +20,11 @@
       background: linear-gradient(135deg, #f5f7fa 0%, #ddeeff 100%);
       min-height: 100vh;
       overflow-x: hidden;
-      overflow-y: auto;  /* 保留原生滚动，移除自定义平滑滚动造成的卡顿 */
+      overflow-y: auto;
     }
 
     #quote {
-      position: relative;  /* 改为相对定位，不再固定，避免与滚动冲突 */
+      position: relative;
       top: 0;
       margin: 20px auto 0 auto;
       transform: none;
@@ -73,7 +73,7 @@
 
     .book-item {
       position: relative;
-      width: 220px;          /* 原280 → 220，整体缩小适配更小图片 */
+      width: 220px;
       transition: transform 0.25s ease;
       display: flex;
       flex-direction: column;
@@ -133,16 +133,17 @@
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     }
 
-    /* 核心优化：图片尺寸缩小一半 (原高度400px -> 260px，宽度比例相应缩减) */
+    /* 关键修改：图片完整显示，不使用裁剪 - object-fit: contain 保持完整比例，不裁剪任何内容 */
     .book-image {
       width: 100%;
-      height: 260px;         /* 从400px减少至260px，缩小约35%，视觉舒适 */
-      object-fit: cover;
+      height: auto;           /* 高度自适应，保持原始比例 */
+      aspect-ratio: 2 / 3;   /* 设置一个优雅的书籍比例（宽高比2:3），可根据需要调整，保证容器一致性但不裁剪内容 */
+      object-fit: contain;    /* 关键：contain 保证完整显示图片，不裁剪任何部分 */
       border-radius: 12px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
       border: 1px solid rgba(255, 255, 255, 0.5);
       transition: all 0.2s ease;
-      background-color: #faf3e0;  /* 优雅占位底色 */
+      background-color: #faf3e0;
       display: block;
     }
 
@@ -151,9 +152,31 @@
       transform: scale(1.01);
     }
 
-    /* 可选辅助说明: 减轻内存压力 - 图片实际加载时已经更小尺寸，CSS保证视觉 */
-    
-    /* 响应式精细调整 */
+    /* 可选：为了统一视觉效果，给图片容器添加一个优雅的背景，让留白区域更协调 */
+    .book-image-wrapper {
+      width: 100%;
+      background: linear-gradient(145deg, #f5ede3, #e8dfd3);
+      border-radius: 12px;
+      padding: 4px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 书名样式保持 */
+    .book-title {
+      font-size: 18px;
+      margin-top: 10px;
+      font-weight: 500;
+      color: #3e3a39;
+      text-align: center;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: 'Caveat', cursive;
+      letter-spacing: 0.5px;
+    }
+
+    /* 响应式调整 */
     @media (max-width: 900px) {
       #quote {
         font-size: 20px;
@@ -166,9 +189,6 @@
       .book-item {
         width: 200px;
       }
-      .book-image {
-        height: 240px;
-      }
       .book-label {
         width: 52px;
         height: 52px;
@@ -178,6 +198,9 @@
         font-size: 20px;
       }
       .book-emoji {
+        font-size: 16px;
+      }
+      .book-title {
         font-size: 16px;
       }
     }
@@ -190,9 +213,6 @@
       .book-item {
         width: 170px;
       }
-      .book-image {
-        height: 210px;
-      }
       .book-label {
         width: 48px;
         height: 48px;
@@ -204,15 +224,16 @@
       .book-emoji {
         font-size: 14px;
       }
+      .book-title {
+        font-size: 14px;
+        margin-top: 8px;
+      }
     }
 
     @media (max-width: 480px) {
       .book-item {
         width: 44%;
         max-width: 170px;
-      }
-      .book-image {
-        height: 190px;
       }
       .book-label {
         width: 44px;
@@ -228,6 +249,9 @@
       .quote-attribution {
         font-size: 15px;
       }
+      .book-title {
+        font-size: 13px;
+      }
     }
     
     /* 优雅加载提示 */
@@ -239,9 +263,8 @@
       width: 100%;
     }
     
-    /* 移除之前自定义滚动造成的影响，确保原生滚动流畅 */
     html {
-      scroll-behavior: smooth;  /* 保留原生平滑滚动但不会卡顿，比js干预更流畅 */
+      scroll-behavior: smooth;
     }
   </style>
 </head>
@@ -258,17 +281,7 @@
   <div id="book-container"></div>
 
   <script>
-    // 优化内存 & 加载速度： 使用更轻量级图片处理 + 图片加载错误时统一优雅降级
-    // 为了避免图片过大的内存占用，我们在前端无法直接修改服务器图片物理大小，但可以通过合理控制显示尺寸 + 提示用户图片规格，但为了真正减小内存，
-    // 可以在fetch后动态通知？但最佳实践：在实际部署时生成缩略图。这里采用提示+ 如果图片尺寸太大浏览器仍会下载原图，但通过CSS限制渲染尺寸和懒加载优化。
-    // 额外增加: 检测图片自然尺寸，若超过阈值给出建议但不影响体验，或者使用createImageBitmap优化？ 不需要过度。
-    // 更好的方法：在加载书籍列表时，我们可以尝试请求 assets/photos/ 下的图片，但保留原样。如原图巨大，则建议服务端压缩。
-    // 为了在当前环境下直接缓解: 为所有img设置 decoding="async" 并且 loading="lazy"，同时添加fetchpriority优化。
-    
-    // 附加说明: 为了真正降低内存，书图缩小一半视觉尺寸并且图片最好压缩到宽度500px以内。用户可后期替换压缩图。本代码已让图片显示宽220-280px对应高度更小，实际下载图片资源由booklist.json决定。
-    // 增强: 图片加载失败自动替换为内嵌极简占位图，避免破碎感。并且不会导致重试消耗。
-    
-    // 自定义加载管理器，额外记录加载时间，不阻塞渲染。
+    // 加载书籍数据
     const container = document.getElementById('book-container');
     
     // 优雅显示加载中状态
@@ -324,53 +337,41 @@
             </div>
           `;
           
-          // 图片元素 - 高度优化且懒加载，减少内存占用
+          // 图片元素 - 使用 contain 保证完整显示，不裁剪任何内容
           const img = document.createElement('img');
           img.className = 'book-image';
           // 使用拼音文件名或后备名称
           let imageName = (book.pinyin && book.pinyin.trim() !== '') ? book.pinyin : `book_${index + 1}`;
-          // 处理可能包含空格或特殊字符? 简单编码
+          // 处理可能包含空格或特殊字符
           const encodedName = encodeURIComponent(imageName);
           img.src = `assets/photos/${encodedName}.jpg`;
           img.alt = book.title ? `${book.title} 封面` : `书籍 ${index + 1}`;
-          img.loading = 'lazy';     // 懒加载，提升滚动性能
-          img.decoding = 'async';    // 异步解码图像，减少主线程阻塞
+          img.loading = 'lazy';
+          img.decoding = 'async';
           
-          // 可选设置 fetchpriority 为 low 对于非首屏图片 (浏览器自动处理也可以)
-          // 添加优雅的错误处理，且内存友好（不会反复请求）
+          // 优雅的错误处理 - 使用完整显示的占位图
           img.onerror = function() {
-            // 避免重复触发错误，移除onerror句柄
             this.onerror = null;
-            // 轻量级占位图 - 内嵌SVG大小极小，内存占用几乎为0
-            this.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 280 260\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23f3ede5\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'monospace\' font-size=\'16\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23bfa88a\'%3E📖 无图%3C/text%3E%3C/svg%3E';
-            // 同时添加一个标记类以便样式微调
-            this.style.objectFit = 'contain';
+            // 使用 SVG 占位图，同样完整显示，不裁剪
+            this.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 300 450\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%23f3ede5\'/%3E%3Ctext x=\'50%25\' y=\'45%25\' font-family=\'monospace\' font-size=\'18\' text-anchor=\'middle\' fill=\'%23bfa88a\'%3E📖%3C/text%3E%3Ctext x=\'50%25\' y=\'55%25\' font-family=\'monospace\' font-size=\'14\' text-anchor=\'middle\' fill=\'%239c7e5c\'%3ENo Image%3C/text%3E%3C/svg%3E';
             this.style.backgroundColor = '#f7f2ea';
+            // 确保占位图也完整显示
+            this.style.objectFit = 'contain';
           };
           
-          // 可选：为每个图片添加自定义属性记录书籍ID，但不需要
           labelContainer.appendChild(label);
           bookItem.appendChild(labelContainer);
           bookItem.appendChild(img);
           
-          // 附加可选书名显示（简洁，增加一点上下文，但不强制，不显著影响性能）
+          // 添加书名（如果存在）
           if (book.title && book.title.length > 0) {
             const titleSpan = document.createElement('div');
             titleSpan.className = 'book-title';
-            titleSpan.style.fontSize = '18px';
-            titleSpan.style.marginTop = '10px';
-            titleSpan.style.fontWeight = '500';
-            titleSpan.style.color = '#3e3a39';
-            titleSpan.style.textAlign = 'center';
-            titleSpan.style.maxWidth = '100%';
-            titleSpan.style.overflow = 'hidden';
-            titleSpan.style.textOverflow = 'ellipsis';
-            titleSpan.style.whiteSpace = 'nowrap';
-            titleSpan.title = book.title;  // 完整名称悬浮显示
-            // 处理标题过长
+            // 处理标题过长，完整显示在tooltip中
             let displayTitle = book.title;
-            if (displayTitle.length > 22) displayTitle = displayTitle.slice(0, 20) + '…';
+            if (displayTitle.length > 24) displayTitle = displayTitle.slice(0, 22) + '…';
             titleSpan.textContent = displayTitle;
+            titleSpan.title = book.title;  // 鼠标悬停显示完整书名
             bookItem.appendChild(titleSpan);
           }
           
@@ -379,14 +380,31 @@
         
         container.appendChild(fragment);
         
-        // 优化滚动性能：移除之前 wheel 的preventDefault 引起的滚动卡顿
-        // 已经完全移除原始的 addEventListener wheel 干预，保证浏览器原生滚动体验。
-        // 额外动态调整布局轻量化，无需重新计算位置，因为不再有绝对定位冲突。
+        // 可选：为所有图片添加一个加载完成后的轻微优化，确保布局稳定
+        const allImages = document.querySelectorAll('.book-image');
+        let loadedCount = 0;
+        const totalImages = allImages.length;
         
-        // 可选: 当所有图片加载完成后，如果有需要重新调整布局的小细节，触发一次轻微重排即可（无需）
-        // 由于移除了 fixed 的 quote 和强制 top 调整，页面布局更自然，滚动丝滑。
+        // 简单的图片加载完成处理，用于优化体验（非必须）
+        if (totalImages > 0) {
+          const checkAllLoaded = () => {
+            loadedCount++;
+            if (loadedCount === totalImages) {
+              // 所有图片加载完成，可以添加一个类用于额外效果（可选）
+              document.body.classList.add('images-loaded');
+            }
+          };
+          allImages.forEach(img => {
+            if (img.complete) {
+              loadedCount++;
+            } else {
+              img.addEventListener('load', checkAllLoaded);
+              img.addEventListener('error', checkAllLoaded);
+            }
+          });
+        }
         
-        // 小优化：监听图片加载，防止布局抖动，但默认已有宽高，稳定。
+        console.log('✨ 书籍加载完成，图片使用完整显示模式（不裁剪），滚动流畅');
       })
       .catch(error => {
         console.error('加载书籍数据时出错:', error);
@@ -394,27 +412,9 @@
         container.innerHTML = '<div style="text-align: center; font-size: 22px; color: #a0522d; background: #fff8f0; margin: 40px auto; padding: 40px; border-radius: 28px; max-width: 80%;">📭 无法加载书籍清单，请检查网络或 booklist.json 文件是否存在。<br><span style="font-size: 16px;">' + error.message + '</span></div>';
       });
     
-    // 彻底移除之前导致鼠标/滚轮卡顿的代码（原来window wheel事件preventDefault）
-    // 不再使用自定义滚动劫持，用户滚动体验回归原生且流畅。
-    // 同时移除了adjustContainerPosition的逻辑，因为quote改为相对定位，不再需要动态计算top。
-    // 确保没有任何setInterval或resize强制修改top导致重绘抖动。
-    
-    // 针对移动端触摸滚动也完全不干扰，完美解决“鼠标移动很慢”的问题。
-    // 附加优化：为防止某些旧浏览器滚动不流畅，设置CSS will-change 给滚动容器？ body自然滚动很快。
-    // 另外图片内存：由于显示尺寸缩小一半，浏览器渲染层开销降低；同时原图如果较大，用户可以考虑后期替换 assets/photos 图片为压缩版，但代码本身已最大程度通过显示尺寸缩小减少显存占用。
-    
-    // 补充功能：给所有书籍图片添加一个轻量级监听，在移动端hover可能不适用，但不影响。
-    // 为更优雅体验，添加页面可见性变化时无需操作。
-    
-    // 处理小优化：如果有大量图片，防止同时加载太多，已经使用lazy loading。
-    // 增加一个简单交叉观察器可选预加载？不需要，默认lazy足够好。
-    
-    // 增加检测图片实际占用内存的建议提示（但非必须，console可忽略）
-    // 如果开发者想主动压缩图片，可在控制台提示，但我们只负责前端展示。让用户感知“图片尺寸缩小”视觉上图片比原来小了一半，内存压力降低。
-    
-    // 针对视网膜屏幕也可以保持清晰，因为图片宽度自适应220px左右，原图即便高清，下载后缩放也会占用内存但相较于原来显示400px高度，现在高度260px，内存占用大约为之前的 (260/400≈0.65) 面积比0.42，大幅降低。
-    // 另book-item宽度从280降至220，面积缩小38% 视觉与内存双重优化。
-    console.log('✨ 页面优化完成: 滚动流畅度提升，书籍图片尺寸缩小，内存占用减少');
+    // 完全移除了之前导致滚轮卡顿的 wheel 事件监听
+    // 移除了绝对定位的 quote 动态调整逻辑，页面布局自然流畅
+    // 图片使用 object-fit: contain，保证每本书的封面完整显示，上下左右都不会被裁剪
   </script>
 </body>
 </html>
