@@ -25,7 +25,7 @@
 
     /* 缩放控制栏 - 悬浮优雅 */
     .zoom-controls {
-      position: sticky;
+      position: fixed;
       top: 16px;
       z-index: 200;
       display: flex;
@@ -349,7 +349,7 @@
     // 缩放功能核心 (手动缩放图片大小，范围 50% ~ 200%，步长10%)
     // 并自动重新排列布局 (通过动态改变 .book-item 的宽度)
     // ========================
-    let currentScalePercent = 100;      // 初始 100%
+    let currentScalePercent = 50;      // 初始 50%
     const DEFAULT_WIDTH = 220;           // 基准宽度 (px) 与 CSS .book-item 初始一致
     const MIN_SCALE = 50;
     const MAX_SCALE = 200;
@@ -620,26 +620,9 @@
       }
     }
     
-    // 观察书籍加载完成: 由于fetch异步，在.then中已经设置了bookItems，但为了确保控件点击时bookItems已存在，
-    // 我们额外在书籍加载完成后再次同步bookItems并刷新一下显示（其实已经刷新了）。并确保事件已绑定。
-    // 另外使用 MutationObserver 做后备，简单起见直接等待setTimeout确保初始绑定后书籍加载也会更新bookItems引用
-    // 最终在页面完全初始化完毕后再次检查
     window.addEventListener('DOMContentLoaded', () => {
       bindRobustEvents();
-      // 如果书籍加载很快，bookItems可能已经被填充；如果很慢，等fetch完毕后上面代码会填充bookItems。
-      // 但为了用户点击缩放时能够应用，在上面fetch之后已经调用了 applyZoomToItems，且bookItems已经赋值。
-      // 同时也为了防止极少数竞态，额外暴露一个刷新引用的方法
-    });
-    
-    // 最终确保在fetch完成后, 把最新的bookItems同步给缩放核心 (上面已经做了)
-    // 另外监视容器变化（如有动态添加书籍，但无要求，足够）
-    // 完美支持缩放 + 自动重排（flex-wrap会自动适配新的卡片宽度）
-    
-    // 另外针对窗口resize时，卡片的宽度是基于当前缩放比例的固定px，不会丢失比例，且布局完美重新排列。
-    // 如果用户缩放后窗口宽度变化，flex自动换行重新排列，无需额外代码。
-    
-    // 补充一个细节：保证缩放时过渡平滑，已经对 .book-item 的 width 添加了 transition
-    // 可选：手动触发一次重新布局，确保百分比显示正确
+     
     setTimeout(() => {
       if (bookItems.length) applyZoomToItems();
       const percentSpan = document.getElementById('zoom-percent');
