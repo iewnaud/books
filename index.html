@@ -25,7 +25,7 @@
 
     /* 缩放控制栏 - 悬浮优雅 */
     .zoom-controls {
-      position: fixed;
+      position: sticky;
       top: 16px;
       z-index: 200;
       display: flex;
@@ -327,10 +327,10 @@
 <body>
   <div id="quote">
     <div class="main-text">
-      If we must build a bridge, let us throw one arch at least over the darker gulf of ignorance which surrounds us.
+      Change later.
     </div>
     <div class="quote-attribution">
-      &mdash; Thoreau, <em>Walden</em>
+      &mdash; Sheldon, <em>Bigbang</em>
     </div>
   </div>
 
@@ -349,7 +349,7 @@
     // 缩放功能核心 (手动缩放图片大小，范围 50% ~ 200%，步长10%)
     // 并自动重新排列布局 (通过动态改变 .book-item 的宽度)
     // ========================
-    let currentScalePercent = 50;      // 初始 50%
+    let currentScalePercent = 100;      // 初始 100%
     const DEFAULT_WIDTH = 220;           // 基准宽度 (px) 与 CSS .book-item 初始一致
     const MIN_SCALE = 50;
     const MAX_SCALE = 200;
@@ -633,3 +633,4 @@
   </script>
 </body>
 </html>
+ 稍微改下，现在滚轮往下拉时，上面的缩放button会一直留在前端，可以固定在初始位置吗？
